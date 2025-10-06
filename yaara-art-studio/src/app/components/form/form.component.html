@@ -7,7 +7,7 @@
     </div>
     
     <div class="form-container">
-      <div class="form-content" [style.display]="showPaymentButtons ? 'none' : 'block'">
+      <div class="form-content">
         <form 
           [formGroup]="registrationForm" 
           (ngSubmit)="onSubmit()" 
@@ -175,12 +175,6 @@
         </div>
       </div>
     </div>
-    
-    <!-- Payment Component -->
-    <app-payment 
-      [showPaymentButtons]="showPaymentButtons"
-      (paymentSuccess)="onPaymentSuccess()">
-    </app-payment>
     
     <!-- Success Message -->
     <div class="success-message" *ngIf="showSuccessMessage" [@fadeInOut]>

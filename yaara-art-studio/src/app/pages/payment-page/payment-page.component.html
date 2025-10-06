@@ -1,0 +1,14 @@
+<!-- Payment Page - Only Navbar, Payment Section, and Footer -->
+<div class="payment-page">
+  <!-- Header/Navbar -->
+  <app-header></app-header>
+
+  <!-- Main Content - Payment Section Only -->
+  <main class="payment-main">
+    <app-payment (paymentSuccess)="onPaymentSuccess()">
+    </app-payment>
+  </main>
+
+  <!-- Footer -->
+  <app-footer></app-footer>
+</div>

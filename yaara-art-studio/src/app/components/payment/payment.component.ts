@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
@@ -8,7 +8,6 @@ import { Router } from '@angular/router';
   styleUrl: './payment.component.scss'
 })
 export class PaymentComponent {
-  @Input() showPaymentButtons: boolean = false;
   @Output() paymentSuccess = new EventEmitter<void>();
 
   constructor(private router: Router) {}

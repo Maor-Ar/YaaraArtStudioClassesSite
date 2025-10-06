@@ -3,12 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { Router } from '@angular/router';
-import { PaymentComponent } from '../payment/payment.component';
 
 @Component({
   selector: 'app-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PaymentComponent],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './form.component.html',
   styleUrl: './form.component.scss',
   animations: [
@@ -29,7 +28,6 @@ export class FormComponent {
   registrationForm: FormGroup;
   isSubmitting = false;
   showSuccessMessage = false;
-  showPaymentButtons = false;
   lessonOptions: string[] = [];
 
   constructor(private fb: FormBuilder, private router: Router) {
@@ -174,12 +172,9 @@ export class FormComponent {
         const result = await response.json();
         console.log('Formspree response:', result);
         
-        // Show payment buttons instead of success message
+        // Navigate to payment page
         this.isSubmitting = false;
-        this.showPaymentButtons = true;
         this.registrationForm.reset();
-        
-        // Navigate to payment section
         this.router.navigate(['/payments']);
       } else {
         console.error('Form submission failed:', response.status, response.statusText);
@@ -195,19 +190,5 @@ export class FormComponent {
       this.isSubmitting = false;
       alert('שגיאת רשת. אנא בדקו את החיבור לאינטרנט ונסו שוב.');
     }
-  }
-
-  /**
-   * Handle payment success - show success message and navigate back
-   */
-  onPaymentSuccess(): void {
-    this.showPaymentButtons = false;
-    this.showSuccessMessage = true;
-    
-    // Hide success message after 5 seconds and navigate back to form
-    setTimeout(() => {
-      this.showSuccessMessage = false;
-      this.router.navigate(['/'], { fragment: 'contact' });
-    }, 5000);
   }
 }

@@ -1,0 +1,34 @@
+/* Payment Page Styles */
+
+.payment-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+}
+
+.payment-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure payment section takes full available space */
+.payment-main app-payment {
+  flex: 1;
+  display: block;
+}
+
+/* Override payment component styles for full page */
+.payment-main app-payment .payment-section {
+  min-height: calc(100vh - 120px); /* Account for header and footer */
+  padding: 2rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .payment-main app-payment .payment-section {
+    min-height: calc(100vh - 100px);
+    padding: 1rem 0;
+  }
+}

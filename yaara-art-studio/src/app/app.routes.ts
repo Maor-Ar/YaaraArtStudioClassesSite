@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
-import { PaymentComponent } from './components/payment/payment.component';
+import { PaymentPageComponent } from './pages/payment-page/payment-page.component';
 
 export const routes: Routes = [
   {
     path: 'payments',
-    component: PaymentComponent,
+    component: PaymentPageComponent,
     title: 'תשלומים - סטודיו יערה'
   },
   {
