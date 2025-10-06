@@ -102,22 +102,8 @@ export class FormComponent {
         message: formData.message
       });
       
-      // Let Formspree handle the actual submission
-      // We'll show success message after a short delay
-      setTimeout(() => {
-        console.log('Form submission completed (simulated)');
-        this.isSubmitting = false;
-        this.showSuccessMessage = true;
-        this.registrationForm.reset();
-        
-        // Hide success message after 5 seconds
-        setTimeout(() => {
-          this.showSuccessMessage = false;
-        }, 5000);
-      }, 1000);
-      
-      // Submit the form using HTML form submission (Formspree doesn't allow AJAX without custom key)
-      this.submitFormToFormspree();
+      // Submit the form using fetch API
+      this.submitToFormspree();
     } else {
       console.log('Form is invalid, showing validation errors');
       console.log('Form control errors:', this.getFormErrors());
@@ -140,9 +126,8 @@ export class FormComponent {
     return errors;
   }
 
-  private submitFormToFormspree(): void {
+  private async submitToFormspree(): Promise<void> {
     const formData = this.registrationForm.value;
-    const form = this.formElement.nativeElement;
     
     console.log('Preparing to submit form to Formspree with data:', {
       firstName: formData.firstName,
@@ -154,28 +139,60 @@ export class FormComponent {
       message: formData.message
     });
     
-    // Update the form fields with the actual values from Angular reactive form
-    const firstNameInput = form.querySelector('[name="firstName"]') as HTMLInputElement;
-    const lastNameInput = form.querySelector('[name="lastName"]') as HTMLInputElement;
-    const phoneInput = form.querySelector('[name="phone"]') as HTMLInputElement;
-    const experienceSelect = form.querySelector('[name="experience"]') as HTMLSelectElement;
-    const lessonTypeSelect = form.querySelector('[name="lessonType"]') as HTMLSelectElement;
-    const lessonDateSelect = form.querySelector('[name="lessonDate"]') as HTMLSelectElement;
-    const messageTextarea = form.querySelector('[name="message"]') as HTMLTextAreaElement;
+    // Create FormData object for Formspree
+    const formDataToSend = new FormData();
+    formDataToSend.append('_subject', 'הרשמה חדשה לשיעור ניסיון - סטודיו יערה');
+    formDataToSend.append('_replyto', 'noreply@yaaraartstudio.com');
+    formDataToSend.append('_captcha', 'false');
+    formDataToSend.append('firstName', formData.firstName || '');
+    formDataToSend.append('lastName', formData.lastName || '');
+    formDataToSend.append('phone', formData.phone || '');
+    formDataToSend.append('experience', formData.experience || '');
+    formDataToSend.append('lessonType', formData.lessonType || '');
+    formDataToSend.append('lessonDate', formData.lessonDate || '');
+    formDataToSend.append('message', formData.message || '');
     
-    if (firstNameInput) firstNameInput.value = formData.firstName || '';
-    if (lastNameInput) lastNameInput.value = formData.lastName || '';
-    if (phoneInput) phoneInput.value = formData.phone || '';
-    if (experienceSelect) experienceSelect.value = formData.experience || '';
-    if (lessonTypeSelect) lessonTypeSelect.value = formData.lessonType || '';
-    if (lessonDateSelect) lessonDateSelect.value = formData.lessonDate || '';
-    if (messageTextarea) messageTextarea.value = formData.message || '';
+    console.log('Sending data to Formspree...');
     
-    console.log('Form fields updated, submitting to Formspree...');
-    
-    // Submit the form (this will cause a page redirect to Formspree)
-    setTimeout(() => {
-      form.submit();
-    }, 2000); // Give time for success message to show
+    try {
+      const response = await fetch('https://formspree.io/f/xovklpvr', {
+        method: 'POST',
+        body: formDataToSend,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      
+      console.log('Formspree response status:', response.status);
+      console.log('Formspree response ok:', response.ok);
+      
+      if (response.ok) {
+        console.log('Form submitted successfully to Formspree!');
+        const result = await response.json();
+        console.log('Formspree response:', result);
+        
+        // Show success message
+        this.isSubmitting = false;
+        this.showSuccessMessage = true;
+        this.registrationForm.reset();
+        
+        // Hide success message after 5 seconds
+        setTimeout(() => {
+          this.showSuccessMessage = false;
+        }, 5000);
+      } else {
+        console.error('Form submission failed:', response.status, response.statusText);
+        const error = await response.text();
+        console.error('Error details:', error);
+        
+        // Show error message to user
+        this.isSubmitting = false;
+        alert('שגיאה בשליחת הטופס. אנא נסו שוב או צרו קשר בטלפון.');
+      }
+    } catch (error) {
+      console.error('Network error submitting form:', error);
+      this.isSubmitting = false;
+      alert('שגיאת רשת. אנא בדקו את החיבור לאינטרנט ונסו שוב.');
+    }
   }
 }

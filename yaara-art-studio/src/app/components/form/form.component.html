@@ -9,25 +9,16 @@
     <div class="form-container">
       <div class="form-content">
         <form 
-          action="https://formspree.io/f/xovklpvr" 
-          method="POST" 
           [formGroup]="registrationForm" 
           (ngSubmit)="onSubmit()" 
           class="registration-form"
           #formElement>
-          
-          <!-- Hidden fields for Formspree -->
-          <input type="hidden" name="_subject" value="הרשמה חדשה לשיעור ניסיון - סטודיו יערה">
-          <input type="hidden" name="_replyto" value="noreply@yaaraartstudio.com">
-          <input type="hidden" name="_next" value="https://yaaraartstudio.com/thank-you">
-          <input type="hidden" name="_captcha" value="false">
           <div class="form-grid">
             <div class="form-group">
               <label for="firstName" class="form-label">שם פרטי *</label>
               <input 
                 type="text" 
                 id="firstName" 
-                name="firstName"
                 formControlName="firstName" 
                 class="form-input"
                 placeholder="הזינו את השם הפרטי שלכם"
@@ -43,7 +34,6 @@
               <input 
                 type="text" 
                 id="lastName" 
-                name="lastName"
                 formControlName="lastName" 
                 class="form-input"
                 placeholder="הזינו את שם המשפחה שלכם"
@@ -59,7 +49,6 @@
               <input 
                 type="tel" 
                 id="phone" 
-                name="phone"
                 formControlName="phone" 
                 class="form-input"
                 placeholder="הזינו מספר טלפון"
@@ -74,7 +63,6 @@
               <label for="experience" class="form-label">רמת ניסיון</label>
               <select 
                 id="experience" 
-                name="experience"
                 formControlName="experience" 
                 class="form-select"
               >
@@ -90,7 +78,6 @@
               <label for="lessonType" class="form-label">סוג שיעור</label>
               <select 
                 id="lessonType" 
-                name="lessonType"
                 formControlName="lessonType" 
                 class="form-select"
               >
@@ -107,7 +94,6 @@
               <label for="lessonDate" class="form-label">בחר שיעור</label>
               <select 
                 id="lessonDate" 
-                name="lessonDate"
                 formControlName="lessonDate" 
                 class="form-select"
               >
@@ -120,7 +106,6 @@
               <label for="message" class="form-label">הודעה</label>
               <textarea 
                 id="message" 
-                name="message"
                 formControlName="message" 
                 class="form-textarea"
                 rows="4"
