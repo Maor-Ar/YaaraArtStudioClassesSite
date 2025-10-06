@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { ThemeService } from '../../services/theme.service';
 
@@ -24,8 +24,59 @@ import { ThemeService } from '../../services/theme.service';
     ])
   ]
 })
-export class HeroComponent {
+export class HeroComponent implements OnInit, AfterViewInit {
+  @ViewChild('heroVideo', { static: false }) heroVideo!: ElementRef<HTMLVideoElement>;
+  showStaticBg = false;
+
   constructor(public themeService: ThemeService) {}
+
+  ngOnInit(): void {
+    console.log('Hero component initialized');
+  }
+
+  ngAfterViewInit(): void {
+    this.setupVideoHandlers();
+  }
+
+  private setupVideoHandlers(): void {
+    if (this.heroVideo?.nativeElement) {
+      const video = this.heroVideo.nativeElement;
+      
+      // Add event listeners for debugging
+      video.addEventListener('loadstart', () => {
+        console.log('Video loading started');
+      });
+
+      video.addEventListener('loadeddata', () => {
+        console.log('Video data loaded');
+      });
+
+      video.addEventListener('canplay', () => {
+        console.log('Video can start playing');
+      });
+
+      video.addEventListener('error', (e) => {
+        console.error('Video error:', e);
+        console.error('Video error details:', video.error);
+      });
+
+      video.addEventListener('play', () => {
+        console.log('Video started playing');
+      });
+
+      // Try to play the video
+      video.play().then(() => {
+        console.log('Video autoplay successful');
+      }).catch((error) => {
+        console.error('Video autoplay failed:', error);
+        // Try to play with user interaction
+        document.addEventListener('click', () => {
+          video.play().catch(console.error);
+        }, { once: true });
+      });
+    }
+  }
+
   scrollToSection(sectionId: string): void {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -34,6 +85,11 @@ export class HeroComponent {
         block: 'start'
       });
     }
+  }
+
+  onVideoError(event: any): void {
+    console.error('Video failed to load, showing static background');
+    this.showStaticBg = true;
   }
 
   getLogoSrc(): string {

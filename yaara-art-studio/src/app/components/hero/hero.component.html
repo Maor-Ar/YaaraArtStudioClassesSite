@@ -1,15 +1,31 @@
 <!-- Hero Section -->
 <section id="home" class="hero">
   <div class="hero-background">
-    <!-- Option 1: Use GitHub Issues hosting (most reliable) -->
-    <video class="hero-video" autoplay muted loop playsinline preload="metadata">
-      <!-- Using GitHub user-attachments hosting (most reliable for GitHub Pages) -->
-      <source src="https://github.com/user-attachments/assets/2b410ef3-2fa0-4c9c-bab0-d5589b1ec09d" type="video/mp4">
-      <!-- Fallback to local video -->
-      <source src="assets/videos/BG-video1.mp4" type="video/mp4">
+    <!-- Video background with fallback -->
+    <video 
+      #heroVideo
+      class="hero-video" 
+      autoplay 
+      muted 
+      loop 
+      playsinline 
+      preload="auto"
+      webkit-playsinline
+      x5-playsinline
+      x5-video-player-type="h5"
+      x5-video-player-fullscreen="true"
+      (error)="onVideoError($event)">
+      <!-- Using local video file with optimized settings -->
+      <source src="assets/videos/BG-video1.mp4" type="video/mp4; codecs=avc1.42E01E">
       <!-- Fallback for browsers that don't support video -->
       Your browser does not support the video tag.
     </video>
+    
+    <!-- Static background fallback -->
+    <div class="hero-static-bg" [style.display]="showStaticBg ? 'block' : 'none'">
+      <img src="assets/images/hero-bg-fallback.jpg" alt="Background" class="hero-bg-image">
+    </div>
+    
     <div class="hero-overlay"></div>
   </div>
   
