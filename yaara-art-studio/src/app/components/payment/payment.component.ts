@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
@@ -7,10 +7,13 @@ import { Router } from '@angular/router';
   templateUrl: './payment.component.html',
   styleUrl: './payment.component.scss'
 })
-export class PaymentComponent {
+export class PaymentComponent implements OnInit {
   @Output() paymentSuccess = new EventEmitter<void>();
 
   constructor(private router: Router) {}
+  ngOnInit(): void {
+    window.scrollTo(0, 0);
+  }
   // Phone number from contact section
   private readonly phoneNumber = '0556646033'; // Remove dashes for deep links
   private readonly phoneNumberFormatted = '055-664-6033';
@@ -77,12 +80,20 @@ export class PaymentComponent {
   }
 
   /**
-   * Open WhatsApp for manual payment coordination
+   * Initiate Kashkash payment
+   * Kashkash deep link format: kashkash://pay?phone=PHONE&amount=AMOUNT&description=DESCRIPTION
    */
-  openWhatsAppPayment(): void {
-    const message = encodeURIComponent(`שלום! אני מעוניין/ת לשלם עבור שיעור ניסיון ב-${this.lessonPrice}₪. איך אפשר לבצע את התשלום?`);
-    const whatsappUrl = `https://wa.me/972${this.phoneNumber}?text=${message}`;
-    window.open(whatsappUrl, '_blank');
+  initiateKashkashPayment(): void {
+    const amount = this.lessonPrice;
+    const description = encodeURIComponent('שיעור ניסיון - סטודיו יערה');
+    
+    // Kashkash deep link URL
+    const kashkashUrl = `kashkash://pay?phone=${this.phoneNumber}&amount=${amount}&description=${description}`;
+    
+    // Fallback to web version if app not installed
+    const kashkashWebUrl = `https://kashkash.co.il/pay?phone=${this.phoneNumber}&amount=${amount}&description=${description}`;
+    
+    this.openPaymentApp(kashkashUrl, kashkashWebUrl, 'Kashkash');
   }
 
   /**
