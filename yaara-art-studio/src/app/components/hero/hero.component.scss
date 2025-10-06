@@ -29,6 +29,46 @@
   transform: translate(-50%, -50%);
   object-fit: cover;
   z-index: -1;
+  pointer-events: none;
+  outline: none;
+  border: none;
+  
+  // Hide any video controls or UI elements
+  &::-webkit-media-controls {
+    display: none !important;
+  }
+  
+  &::-webkit-media-controls-panel {
+    display: none !important;
+  }
+  
+  &::-webkit-media-controls-play-button {
+    display: none !important;
+  }
+  
+  &::-webkit-media-controls-timeline {
+    display: none !important;
+  }
+  
+  &::-webkit-media-controls-current-time-display {
+    display: none !important;
+  }
+  
+  &::-webkit-media-controls-time-remaining-display {
+    display: none !important;
+  }
+  
+  &::-webkit-media-controls-mute-button {
+    display: none !important;
+  }
+  
+  &::-webkit-media-controls-volume-slider {
+    display: none !important;
+  }
+  
+  &::-webkit-media-controls-fullscreen-button {
+    display: none !important;
+  }
 }
 
 .hero-static-bg {
