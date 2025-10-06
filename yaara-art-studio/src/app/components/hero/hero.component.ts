@@ -27,7 +27,6 @@ import { ThemeService } from '../../services/theme.service';
 export class HeroComponent implements OnInit, AfterViewInit {
   @ViewChild('heroVideo', { static: false }) heroVideo!: ElementRef<HTMLVideoElement>;
   showStaticBg = false;
-  showPlayButton = false;
 
   constructor(public themeService: ThemeService) {}
 
@@ -36,17 +35,27 @@ export class HeroComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Only setup basic video handlers in browser environment
+    // Only setup video in browser environment
     if (typeof window !== 'undefined') {
-      this.setupVideoHandlers();
+      // Use setTimeout to ensure DOM is fully ready
+      setTimeout(() => {
+        this.setupVideo();
+      }, 0);
     }
   }
 
-  private setupVideoHandlers(): void {
+  private setupVideo(): void {
     if (this.heroVideo?.nativeElement) {
       const video = this.heroVideo.nativeElement;
       
-      // Add event listeners for debugging
+      // Ensure video properties are set correctly
+      video.muted = true;
+      video.loop = true;
+      video.playsInline = true;
+      video.autoplay = true;
+      video.preload = 'auto';
+      
+      // Simple event listeners
       video.addEventListener('loadstart', () => {
         console.log('Video loading started');
       });
@@ -57,11 +66,14 @@ export class HeroComponent implements OnInit, AfterViewInit {
 
       video.addEventListener('canplay', () => {
         console.log('Video can start playing');
+        // Try to play as soon as it can
+        video.play().catch((error) => {
+          console.error('Video autoplay failed on canplay:', error);
+        });
       });
 
       video.addEventListener('error', (e) => {
         console.error('Video error:', e);
-        console.error('Video error details:', video.error);
         this.showStaticBg = true;
       });
 
@@ -69,57 +81,21 @@ export class HeroComponent implements OnInit, AfterViewInit {
         console.log('Video started playing');
       });
 
-      // Try autoplay with a more aggressive approach
-      this.attemptAutoplay(video);
+      // Multiple attempts to play
+      const attemptPlay = () => {
+        video.play().catch((error) => {
+          console.error('Video autoplay failed:', error);
+        });
+      };
+
+      // Try immediately
+      attemptPlay();
+      
+      // Try after a short delay
+      setTimeout(attemptPlay, 100);
+      setTimeout(attemptPlay, 500);
+      setTimeout(attemptPlay, 1000);
     }
-  }
-
-  private attemptAutoplay(video: HTMLVideoElement): void {
-    // First attempt - immediate play
-    const playPromise = video.play();
-    
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        console.log('Video autoplay successful');
-      }).catch((error) => {
-        console.error('Video autoplay failed:', error);
-        
-        // Second attempt - after a short delay
-        setTimeout(() => {
-          video.play().then(() => {
-            console.log('Video autoplay successful on retry');
-          }).catch((retryError) => {
-            console.error('Video autoplay retry failed:', retryError);
-            
-            // Third attempt - when user interacts with the page
-            this.showPlayButton = true;
-            this.setupUserInteractionHandlers(video);
-          });
-        }, 500);
-      });
-    }
-  }
-
-  private setupUserInteractionHandlers(video: HTMLVideoElement): void {
-    const playVideoOnInteraction = () => {
-      video.play().then(() => {
-        console.log('Video started playing after user interaction');
-        this.showPlayButton = false;
-        // Remove all event listeners after successful play
-        this.removeInteractionListeners();
-      }).catch(console.error);
-    };
-
-    // Listen for various user interactions
-    const events = ['click', 'touchstart', 'keydown', 'scroll', 'mousemove'];
-    events.forEach(event => {
-      document.addEventListener(event, playVideoOnInteraction, { once: true, passive: true });
-    });
-  }
-
-  private removeInteractionListeners(): void {
-    // This method can be used to clean up listeners if needed
-    // For now, we use { once: true } so they auto-remove
   }
 
   scrollToSection(sectionId: string): void {
@@ -135,15 +111,6 @@ export class HeroComponent implements OnInit, AfterViewInit {
   onVideoError(event: any): void {
     console.error('Video failed to load, showing static background');
     this.showStaticBg = true;
-  }
-
-  onPlayButtonClick(): void {
-    if (this.heroVideo?.nativeElement) {
-      this.heroVideo.nativeElement.play().then(() => {
-        console.log('Video started playing from play button');
-        this.showPlayButton = false;
-      }).catch(console.error);
-    }
   }
 
   getLogoSrc(): string {
