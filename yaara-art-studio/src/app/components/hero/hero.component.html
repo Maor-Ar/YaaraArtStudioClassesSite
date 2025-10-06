@@ -27,6 +27,18 @@
     </div>
     
     <div class="hero-overlay"></div>
+    
+    <!-- Play button overlay for when autoplay fails -->
+    <div class="play-button-overlay" 
+         [style.display]="showPlayButton ? 'flex' : 'none'"
+         (click)="onPlayButtonClick()">
+      <div class="play-button">
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      </div>
+      <p class="play-text">לחץ כדי להתחיל את הוידאו</p>
+    </div>
   </div>
   
   <div class="container">

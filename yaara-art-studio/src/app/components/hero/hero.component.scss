@@ -110,6 +110,57 @@
   z-index: 0;
 }
 
+.play-button-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 2;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.4);
+    
+    .play-button {
+      transform: scale(1.1);
+    }
+  }
+}
+
+.play-button {
+  width: 100px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  margin-bottom: 1rem;
+  
+  svg {
+    margin-left: 4px; // Adjust for play icon centering
+  }
+}
+
+.play-text {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  margin: 0;
+  text-align: center;
+}
+
 .hero-content {
   margin-bottom: 12px;
   display: grid;
@@ -444,6 +495,11 @@
       rgba(80, 55, 110, 0.8) 75%,
       rgba(95, 65, 130, 0.8) 100%
     );
+  }
+  
+  .play-button {
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--primary);
   }
   
   .hero-text {
