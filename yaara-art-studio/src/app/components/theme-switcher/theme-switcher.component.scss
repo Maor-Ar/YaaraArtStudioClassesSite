@@ -1,0 +1,96 @@
+/* Theme Switcher Component Styles */
+
+.theme-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--accent-light);
+  color: var(--primary);
+  border: none;
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition: var(--transition-normal);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.9rem;
+  box-shadow: var(--shadow-light);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+    background: var(--secondary);
+    color: var(--white);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  &:focus {
+    outline: 2px solid var(--accent-light);
+    outline-offset: 2px;
+  }
+}
+
+.theme-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  transition: var(--transition-normal);
+  
+  svg {
+    transition: var(--transition-normal);
+  }
+  
+  &.dark {
+    transform: rotate(180deg);
+  }
+}
+
+.theme-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: var(--transition-fast);
+}
+
+/* Compact version for mobile */
+.theme-switcher.compact {
+  padding: 0.5rem;
+  min-width: 40px;
+  justify-content: center;
+  
+  .theme-label {
+    display: none;
+  }
+}
+
+/* Animation for icon transition */
+.sun-icon,
+.moon-icon {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Dark theme specific styles */
+.dark-theme .theme-switcher {
+  background: var(--accent-light);
+  color: var(--primary);
+  
+  &:hover {
+    background: var(--primary);
+    color: var(--accent-light);
+  }
+}

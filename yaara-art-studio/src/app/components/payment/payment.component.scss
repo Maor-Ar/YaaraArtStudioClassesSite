@@ -1,0 +1,75 @@
+/* Payment Component Styles */
+
+.payment-placeholder {
+  padding: var(--spacing-xxl) 0;
+  background: var(--background);
+  text-align: center;
+}
+
+.payment-content {
+  h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+  }
+  
+  p {
+    font-size: 1.2rem;
+    color: var(--text-light);
+    margin-bottom: 3rem;
+  }
+}
+
+.payment-methods {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.payment-method {
+  background: var(--white);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-light);
+  transition: var(--transition-normal);
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .method-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    
+    &.bit {
+      background: linear-gradient(135deg, #0070f3, #00d4ff);
+      color: white;
+    }
+    
+    &.paybox {
+      background: linear-gradient(135deg, #ff6b6b, #ffa500);
+      color: white;
+    }
+  }
+  
+  h3 {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary);
+  }
+  
+  p {
+    font-size: 1rem;
+    color: var(--text-light);
+    margin: 0;
+  }
+}
+

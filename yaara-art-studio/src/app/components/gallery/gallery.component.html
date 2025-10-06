@@ -1,0 +1,70 @@
+<!-- Gallery Section -->
+<section id="gallery" class="gallery">
+  <div class="container">
+    <div class="gallery-header">
+      <h2 class="section-title fade-in-up">גלריה</h2>
+      <p class="gallery-subtitle fade-in-up">
+        מבחר מעבודות התלמידים והמורה - עדות ליצירה וההתפתחות בסטודיו
+      </p>
+    </div>
+    
+    <div class="gallery-grid">
+      <div class="gallery-item fade-in-up" 
+           *ngFor="let artwork of artworks; let i = index"
+           (click)="openLightbox(i)"
+           [attr.data-delay]="i * 100">
+        <div class="artwork-image">
+          <img [src]="artwork.imageUrl" [alt]="artwork.title" class="artwork-img">
+          <div class="artwork-overlay">
+            <div class="overlay-content">
+              <h4 class="artwork-title">{{ artwork.title }}</h4>
+              <p class="artwork-description">{{ artwork.description }}</p>
+              <div class="view-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Lightbox Modal -->
+  <div class="lightbox" [class.active]="isLightboxOpen" (click)="closeLightbox()">
+    <div class="lightbox-content" (click)="$event.stopPropagation()">
+      <button class="lightbox-close" (click)="closeLightbox()" aria-label="סגור">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+      </button>
+      
+      <div class="lightbox-image" *ngIf="currentArtwork">
+        <img [src]="currentArtwork.imageUrl" [alt]="currentArtwork.title" class="lightbox-img">
+      </div>
+      
+      <div class="lightbox-info" *ngIf="currentArtwork">
+        <h3 class="lightbox-title">{{ currentArtwork.title }}</h3>
+        <p class="lightbox-description">{{ currentArtwork.description }}</p>
+        <div class="lightbox-details">
+          <span class="detail-item">טכניקה: {{ currentArtwork.technique }}</span>
+          <span class="detail-item">גודל: {{ currentArtwork.size }}</span>
+        </div>
+      </div>
+      
+      <div class="lightbox-navigation">
+        <button class="nav-btn prev" (click)="previousArtwork()" aria-label="קודם">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+          </svg>
+        </button>
+        <button class="nav-btn next" (click)="nextArtwork()" aria-label="הבא">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>

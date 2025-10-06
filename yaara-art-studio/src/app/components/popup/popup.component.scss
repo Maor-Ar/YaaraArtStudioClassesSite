@@ -1,0 +1,248 @@
+/* Popup Component Styles */
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-normal), visibility var(--transition-normal);
+  
+  &.open {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.popup-content {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-heavy);
+  max-width: 90vw;
+  max-height: 90vh;
+  width: 600px;
+  display: flex;
+  flex-direction: column;
+  transform: scale(0.9) translateY(20px);
+  transition: transform var(--transition-normal);
+  
+  &.open {
+    transform: scale(1) translateY(0);
+  }
+}
+
+.popup-close {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: none;
+  border: none;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: var(--transition-fast);
+  z-index: 1;
+  
+  &:hover {
+    color: var(--primary);
+    background: var(--accent-light);
+  }
+  
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.popup-header {
+  padding: 2rem 2rem 1rem;
+  border-bottom: 1px solid var(--accent-light);
+  
+  .popup-title {
+    font-family: var(--font-amatic);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 0;
+    text-align: center;
+  }
+}
+
+.popup-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.popup-text {
+  padding: 2rem;
+  overflow-y: auto;
+  line-height: 1.6;
+  color: var(--text-dark);
+  
+  /* Custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: var(--accent-light);
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 4px;
+    
+    &:hover {
+      background: var(--secondary);
+    }
+  }
+  
+  /* Firefox scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) var(--accent-light);
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-amatic);
+    color: var(--primary);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+  
+  p {
+    margin-bottom: 1rem;
+    color: var(--text-light);
+  }
+  
+  ul, ol {
+    margin-bottom: 1rem;
+    padding-right: 1.5rem;
+    
+    li {
+      margin-bottom: 0.5rem;
+      color: var(--text-light);
+    }
+  }
+  
+  strong {
+    color: var(--primary);
+    font-weight: 600;
+  }
+}
+
+/* Dark theme overrides */
+.dark-theme {
+  .popup-content {
+    background: var(--white);
+    border: 1px solid var(--accent-light);
+  }
+  
+  .popup-header {
+    border-bottom-color: var(--accent-light);
+  }
+  
+  .popup-close {
+    color: var(--text-light);
+    
+    &:hover {
+      color: var(--primary);
+      background: var(--accent-light);
+    }
+  }
+  
+  .popup-text {
+    color: var(--text-dark);
+    
+    h1, h2, h3, h4, h5, h6 {
+      color: var(--primary);
+    }
+    
+    p, li {
+      color: var(--text-light);
+    }
+    
+    strong {
+      color: var(--primary);
+    }
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .popup-content {
+    width: 95vw;
+    max-height: 95vh;
+    margin: 1rem;
+  }
+  
+  .popup-header {
+    padding: 1.5rem 1.5rem 1rem;
+    
+    .popup-title {
+      font-size: 1.5rem;
+    }
+  }
+  
+  .popup-text {
+    padding: 1.5rem;
+  }
+  
+  .popup-close {
+    top: 0.5rem;
+    left: 0.5rem;
+    padding: 0.25rem;
+    
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .popup-content {
+    width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    margin: 0;
+  }
+  
+  .popup-header {
+    padding: 1rem;
+    
+    .popup-title {
+      font-size: 1.3rem;
+    }
+  }
+  
+  .popup-text {
+    padding: 1rem;
+  }
+}
+

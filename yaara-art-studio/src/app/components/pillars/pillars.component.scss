@@ -1,0 +1,231 @@
+/* Pillars Component Styles */
+
+.pillars {
+  padding: var(--spacing-xxl) 0;
+  background: linear-gradient(135deg, var(--background) 0%, var(--accent-light) 100%);
+  position: relative;
+}
+
+.pillars::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="circles" patternUnits="userSpaceOnUse" width="30" height="30"><circle cx="15" cy="15" r="2" fill="%23FFC9C9" opacity="0.3"/></pattern></defs><rect width="100" height="100" fill="url(%23circles)"/></svg>');
+  z-index: 0;
+}
+
+.pillars-header {
+  text-align: center;
+  margin-bottom: 4rem;
+  position: relative;
+  z-index: 1;
+  
+  .section-title {
+    font-family: var(--font-amatic);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--primary);
+  }
+  
+  .pillars-intro {
+    font-size: 1.2rem;
+    color: var(--text-light);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+}
+
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+  position: relative;
+  z-index: 1;
+}
+
+.pillar-card {
+  background: var(--white);
+  padding: 2.5rem 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-light);
+  text-align: center;
+  transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+  }
+  
+  &:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-heavy);
+  }
+  
+  .pillar-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--accent-light), var(--secondary));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: var(--white);
+    transition: var(--transition-normal);
+  }
+  
+  .pillar-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+  }
+  
+  .pillar-description {
+    font-size: 1.1rem;
+    color: var(--text-light);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+  
+  &:hover .pillar-icon {
+    transform: scale(1.1);
+    background: linear-gradient(135deg, var(--secondary), var(--primary));
+  }
+}
+
+.pillar-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  
+  .feature-tag {
+    background: var(--background);
+    color: var(--primary);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-xl);
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1px solid var(--accent-light);
+  }
+}
+
+.pillars-cta {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* Animation delays for staggered effect */
+.pillar-card[data-delay="0"] {
+  animation-delay: 0s;
+}
+
+.pillar-card[data-delay="200"] {
+  animation-delay: 0.2s;
+}
+
+.pillar-card[data-delay="400"] {
+  animation-delay: 0.4s;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .pillars {
+    padding: var(--spacing-xl) 0;
+  }
+  
+  .pillars-header {
+    margin-bottom: 2.5rem;
+    
+    .section-title {
+      font-size: 2rem;
+    }
+    
+    .pillars-intro {
+      font-size: 1.1rem;
+    }
+  }
+  
+  .pillars-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .pillar-card {
+    padding: 2rem 1.5rem;
+    
+    .pillar-icon {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 1rem;
+      
+      svg {
+        width: 32px;
+        height: 32px;
+      }
+    }
+    
+    .pillar-title {
+      font-size: 1.3rem;
+    }
+    
+    .pillar-description {
+      font-size: 1rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .pillars-header {
+    .section-title {
+      font-size: 1.5rem;
+    }
+    
+    .pillars-intro {
+      font-size: 1rem;
+    }
+  }
+  
+  .pillar-card {
+    padding: 1.5rem 1rem;
+    
+    .pillar-icon {
+      width: 50px;
+      height: 50px;
+      
+      svg {
+        width: 24px;
+        height: 24px;
+      }
+    }
+    
+    .pillar-title {
+      font-size: 1.2rem;
+    }
+    
+    .pillar-description {
+      font-size: 0.9rem;
+    }
+    
+    .pillar-features .feature-tag {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+    }
+  }
+}
+

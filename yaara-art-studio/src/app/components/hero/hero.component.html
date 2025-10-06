@@ -1,0 +1,47 @@
+<!-- Hero Section -->
+<section id="home" class="hero">
+  <div class="hero-background">
+    <video class="hero-video" autoplay muted loop playsinline>
+      <source src="assets/videos/BG-video1.mp4" type="video/mp4">
+      <source src="assets/videos/BG-video2.mp4" type="video/mp4">
+    </video>
+    <div class="hero-overlay"></div>
+  </div>
+  
+  <div class="container">
+    <div class="hero-content" [@heroAnimation]>
+      <div class="hero-text">
+        <h1 class="hero-title fade-in-up">
+          להכניס אומנות לחיים
+        </h1>
+        <p class="hero-subtitle fade-in-up">
+          שיעורי ציור חווייתיים בליווי אישי – לכל רמה.
+        </p>
+        <div class="hero-actions fade-in-up">
+          <a href="#contact" class="btn btn-primary" (click)="scrollToSection('contact')">
+            הצטרפו לשיעור ניסיון ב־50₪
+          </a>
+          <a href="#about" class="btn btn-outline" (click)="scrollToSection('about')">
+            גלה עוד
+          </a>
+        </div>
+      </div>
+      
+      <img 
+      [src]="getLogoSrc()" 
+      [alt]="'סטודיו יערה - אמנות ויצירה'"
+      class="logo-image"
+      width="360"
+      height="360">
+    </div>
+    
+    <div class="scroll-indicator">
+      <span class="scroll-text">גללו למטה</span>
+      <div class="scroll-arrow" (click)="scrollToSection('about')">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>

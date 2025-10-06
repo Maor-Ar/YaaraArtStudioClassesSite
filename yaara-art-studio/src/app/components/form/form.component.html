@@ -1,0 +1,211 @@
+<!-- Registration Form Section -->
+<section id="contact" class="form-section">
+  <div class="container">
+    <div class="form-header">
+      <h2 class="section-title fade-in-up">הצטרפו לשיעור ניסיון</h2>
+      <p class="form-subtitle animated-glow fade-in-up">השיעור הראשון רק ב־<span class="price-red">50</span>₪!</p>
+    </div>
+    
+    <div class="form-container">
+      <div class="form-content">
+        <form 
+          action="https://formspree.io/f/xovklpvr" 
+          method="POST" 
+          [formGroup]="registrationForm" 
+          (ngSubmit)="onSubmit()" 
+          class="registration-form"
+          #formElement>
+          
+          <!-- Hidden fields for Formspree -->
+          <input type="hidden" name="_subject" value="הרשמה חדשה לשיעור ניסיון - סטודיו יערה">
+          <input type="hidden" name="_replyto" value="noreply@yaaraartstudio.com">
+          <input type="hidden" name="_next" value="https://yaaraartstudio.com/thank-you">
+          <input type="hidden" name="_captcha" value="false">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="firstName" class="form-label">שם פרטי *</label>
+              <input 
+                type="text" 
+                id="firstName" 
+                name="firstName"
+                formControlName="firstName" 
+                class="form-input"
+                placeholder="הזינו את השם הפרטי שלכם"
+                [class.error]="isFieldInvalid('firstName')"
+              >
+              <div class="error-message" *ngIf="isFieldInvalid('firstName')">
+                שם פרטי הוא שדה חובה
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="lastName" class="form-label">שם משפחה *</label>
+              <input 
+                type="text" 
+                id="lastName" 
+                name="lastName"
+                formControlName="lastName" 
+                class="form-input"
+                placeholder="הזינו את שם המשפחה שלכם"
+                [class.error]="isFieldInvalid('lastName')"
+              >
+              <div class="error-message" *ngIf="isFieldInvalid('lastName')">
+                שם משפחה הוא שדה חובה
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="phone" class="form-label">טלפון *</label>
+              <input 
+                type="tel" 
+                id="phone" 
+                name="phone"
+                formControlName="phone" 
+                class="form-input"
+                placeholder="הזינו מספר טלפון"
+                [class.error]="isFieldInvalid('phone')"
+              >
+              <div class="error-message" *ngIf="isFieldInvalid('phone')">
+                מספר טלפון הוא שדה חובה
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="experience" class="form-label">רמת ניסיון</label>
+              <select 
+                id="experience" 
+                name="experience"
+                formControlName="experience" 
+                class="form-select"
+              >
+                <option value="">בחרו רמת ניסיון</option>
+                <option value="beginner">מתחיל/ה</option>
+                <option value="intermediate">בינוני/ה</option>
+                <option value="advanced">מתקדם/ת</option>
+                <option value="professional">מקצועי/ת</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="lessonType" class="form-label">סוג שיעור</label>
+              <select 
+                id="lessonType" 
+                name="lessonType"
+                formControlName="lessonType" 
+                class="form-select"
+              >
+                <option value="">בחרו סוג שיעור</option>
+                <option value="oil-painting">ציור שמן</option>
+                <option value="watercolor">אקוורל</option>
+                <option value="acrylic">אקריליק</option>
+                <option value="pencil">עיפרון ופחם</option>
+                <option value="mixed">מעורב</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="lessonDate" class="form-label">בחר שיעור</label>
+              <select 
+                id="lessonDate" 
+                name="lessonDate"
+                formControlName="lessonDate" 
+                class="form-select"
+              >
+                <option value="">בחרו תאריך ושעה</option>
+                <option *ngFor="let option of lessonOptions" [value]="option">{{ option }}</option>
+              </select>
+            </div>
+            
+            <div class="form-group full-width">
+              <label for="message" class="form-label">הודעה</label>
+              <textarea 
+                id="message" 
+                name="message"
+                formControlName="message" 
+                class="form-textarea"
+                rows="4"
+                placeholder="ספרו לנו על עצמכם, המטרות שלכם בציור, או כל דבר אחר שתרצו לשתף..."
+              ></textarea>
+            </div>
+          </div>
+          
+          <div class="form-submit">
+            <button 
+              type="submit" 
+              class="btn btn-primary submit-btn"
+              [disabled]="registrationForm.invalid || isSubmitting"
+            >
+              <span *ngIf="!isSubmitting">שלח</span>
+              <span *ngIf="isSubmitting">שולח...</span>
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <div class="form-info">
+        <div class="info-card">
+          <h3>למה לבחור בנו?</h3>
+          <ul class="info-list">
+            <li>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              שיעור ניסיון ב-50₪ בלבד
+            </li>
+            <li>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              ליווי אישי מקצועי
+            </li>
+            <li>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              קבוצות קטנות ואינטימיות
+            </li>
+            <li>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              כל החומרים כלולים במחיר
+            </li>
+          </ul>
+        </div>
+        
+        <div class="contact-info">
+          <h4>פרטי התקשרות</h4>
+          <div class="contact-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+            </svg>
+            <span>055-664-6033</span>
+          </div>
+          <div class="contact-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+            </svg>
+            <span>yaarabuda1&#64;gmail.com</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Success Message -->
+    <div class="success-message" *ngIf="showSuccessMessage" [@fadeInOut]>
+      <div class="success-content">
+        <div class="success-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+        </div>
+        <h3>תודה שנרשמת!</h3>
+        <p>נחזור אליך בהקדם 🌸</p>
+        <p class="success-details">
+          הפרטים נשלחו בהצלחה. 
+          נציג שלנו יצור איתך קשר תוך 24 שעות.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,68 @@
+/* App Component Styles */
+
+.whatsapp-float {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: #25D366;
+  color: white;
+  text-decoration: none;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-medium);
+  transition: all 0.3s ease-in-out;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9rem;
+  opacity: 1;
+  transform: translateY(0);
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-heavy);
+    background: #128C7E;
+    color: white;
+    text-decoration: none;
+  }
+  
+  &.fade-out {
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+  }
+  
+  &.fade-in {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  
+  svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  
+  @media (max-width: 768px) {
+    bottom: 1rem;
+    left: 1rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+    
+    span {
+      display: none;
+    }
+  }
+}
+
+
+
