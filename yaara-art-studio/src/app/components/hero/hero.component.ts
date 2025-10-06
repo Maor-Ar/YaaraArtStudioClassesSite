@@ -35,7 +35,7 @@ export class HeroComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Only setup video handlers in browser environment
+    // Only setup basic video handlers in browser environment
     if (typeof window !== 'undefined') {
       this.setupVideoHandlers();
     }
@@ -56,8 +56,6 @@ export class HeroComponent implements OnInit, AfterViewInit {
 
       video.addEventListener('canplay', () => {
         console.log('Video can start playing');
-        // Try to play when video is ready
-        this.attemptVideoPlay();
       });
 
       video.addEventListener('error', (e) => {
@@ -70,39 +68,21 @@ export class HeroComponent implements OnInit, AfterViewInit {
         console.log('Video started playing');
       });
 
-      // Initial attempt to play
-      this.attemptVideoPlay();
-    }
-  }
-
-  private attemptVideoPlay(): void {
-    if (this.heroVideo?.nativeElement && typeof this.heroVideo.nativeElement.play === 'function') {
-      const video = this.heroVideo.nativeElement;
-      
-      video.play().then(() => {
-        console.log('Video autoplay successful');
-      }).catch((error) => {
-        console.error('Video autoplay failed:', error);
-        // Set up user interaction handlers
-        this.setupUserInteractionHandlers();
-      });
-    }
-  }
-
-  private setupUserInteractionHandlers(): void {
-    const playVideoOnInteraction = () => {
-      if (this.heroVideo?.nativeElement && typeof this.heroVideo.nativeElement.play === 'function') {
-        this.heroVideo.nativeElement.play().then(() => {
-          console.log('Video started playing after user interaction');
-        }).catch(console.error);
+      // Ensure video is ready and attempt play if needed
+      if (video.readyState >= 3) { // HAVE_FUTURE_DATA
+        video.play().catch((error) => {
+          console.error('Video autoplay failed:', error);
+          this.showStaticBg = true;
+        });
+      } else {
+        video.addEventListener('canplay', () => {
+          video.play().catch((error) => {
+            console.error('Video autoplay failed:', error);
+            this.showStaticBg = true;
+          });
+        }, { once: true });
       }
-    };
-
-    // Listen for various user interactions
-    const events = ['click', 'touchstart', 'keydown', 'scroll'];
-    events.forEach(event => {
-      document.addEventListener(event, playVideoOnInteraction, { once: true, passive: true });
-    });
+    }
   }
 
   scrollToSection(sectionId: string): void {

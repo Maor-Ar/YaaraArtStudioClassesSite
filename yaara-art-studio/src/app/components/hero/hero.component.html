@@ -14,9 +14,12 @@
       x5-playsinline
       x5-video-player-type="h5"
       x5-video-player-fullscreen="true"
+      allowfullscreen
+      controls="false"
+      disablepictureinpicture
       (error)="onVideoError($event)">
       <!-- Using local video file with optimized settings -->
-      <source src="assets/videos/BG-video1.mp4" type="video/mp4; codecs=avc1.42E01E">
+      <source src="assets/videos/BG-video1.mp4" type="video/mp4; codecs=avc1.42E01E,mp4a.40.2">
       <!-- Fallback for browsers that don't support video -->
       Your browser does not support the video tag.
     </video>
