@@ -1,14 +1,17 @@
 import { Component, Output, EventEmitter, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-payment',
   standalone: true,
+  imports: [CommonModule],
   templateUrl: './payment.component.html',
   styleUrl: './payment.component.scss'
 })
 export class PaymentComponent implements OnInit {
   @Output() paymentSuccess = new EventEmitter<void>();
+  showSuccessMessage = false;
 
   constructor(private router: Router) {}
   ngOnInit(): void {
@@ -113,7 +116,15 @@ export class PaymentComponent implements OnInit {
    */
   onPaymentSuccess(): void {
     console.log('Payment completed successfully');
-    this.paymentSuccess.emit();
+    
+    // Show success popup first
+    this.showSuccessMessage = true;
+    
+    // Navigate back to main page after 5 seconds
+    setTimeout(() => {
+      this.showSuccessMessage = false;
+      this.router.navigate(['/'], { fragment: 'contact' });
+    }, 5000);
   }
 
   /**
