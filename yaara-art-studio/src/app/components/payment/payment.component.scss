@@ -1,53 +1,81 @@
 /* Payment Component Styles */
 
-.payment-placeholder {
+.payment-section {
   padding: var(--spacing-xxl) 0;
   background: var(--background);
-  text-align: center;
+  min-height: 100vh;
 }
 
 .payment-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.payment-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  
   h2 {
     font-size: 2.5rem;
     margin-bottom: 1rem;
     color: var(--primary);
+    font-family: var(--font-amatic);
+    font-weight: 700;
   }
   
-  p {
-    font-size: 1.2rem;
+  .payment-description {
+    font-size: 1.5rem;
     color: var(--text-light);
-    margin-bottom: 3rem;
+    margin-bottom: 0.5rem;
+    
+    .price {
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 1.8rem;
+    }
+  }
+  
+  .payment-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-light);
+    margin: 0;
   }
 }
 
 .payment-methods {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
-  max-width: 600px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
 }
 
 .payment-method {
   background: var(--white);
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-light);
   transition: var(--transition-normal);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  border: 2px solid transparent;
   
   &:hover {
-    transform: translateY(-5px);
+    transform: translateY(-2px);
     box-shadow: var(--shadow-medium);
+    border-color: var(--accent);
   }
   
   .method-icon {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 1rem;
+    flex-shrink: 0;
+    overflow: hidden;
     
     &.bit {
       background: linear-gradient(135deg, #0070f3, #00d4ff);
@@ -58,18 +86,230 @@
       background: linear-gradient(135deg, #ff6b6b, #ffa500);
       color: white;
     }
+    
+    &.whatsapp {
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: white;
+    }
+    
+    .payment-logo {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 50%;
+    }
   }
   
-  h3 {
-    font-size: 1.3rem;
-    margin-bottom: 0.5rem;
-    color: var(--primary);
+  .method-content {
+    flex: 1;
+    
+    h3 {
+      font-size: 1.3rem;
+      margin-bottom: 0.3rem;
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    p {
+      font-size: 0.95rem;
+      color: var(--text-light);
+      margin: 0 0 0.3rem 0;
+    }
+    
+    .method-price {
+      font-size: 1.1rem;
+      color: var(--accent);
+      font-weight: 700;
+    }
   }
   
-  p {
-    font-size: 1rem;
+  .method-arrow {
     color: var(--text-light);
+    transition: var(--transition-fast);
+  }
+  
+  &:hover .method-arrow {
+    color: var(--accent);
+    transform: translateX(5px);
+  }
+}
+
+.payment-contact {
+  background: var(--white);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-light);
+  margin-bottom: 2rem;
+  
+  h4 {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    color: var(--primary);
+    text-align: center;
+  }
+  
+  .contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem;
+    background: var(--background);
+    border-radius: var(--radius-md);
+    
+    svg {
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    
+    span {
+      flex: 1;
+      font-weight: 500;
+      color: var(--primary);
+    }
+    
+    .copy-btn {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      cursor: pointer;
+      padding: 0.3rem;
+      border-radius: var(--radius-sm);
+      transition: var(--transition-fast);
+      
+      &:hover {
+        background: var(--accent);
+        color: white;
+      }
+    }
+  }
+}
+
+.payment-instructions {
+  background: var(--white);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-light);
+  
+  h4 {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    color: var(--primary);
+    text-align: center;
+  }
+  
+  ul {
+    list-style: none;
+    padding: 0;
     margin: 0;
+    
+    li {
+      padding: 0.8rem 0;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text-light);
+      position: relative;
+      padding-right: 2rem;
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      &:before {
+        content: '✓';
+        position: absolute;
+        right: 0;
+        top: 0.8rem;
+        color: var(--accent);
+        font-weight: bold;
+      }
+    }
+  }
+  
+  .payment-complete-section {
+    margin-top: 2rem;
+    text-align: center;
+    
+    .payment-complete-btn {
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: var(--radius-lg);
+      background: var(--accent);
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition-normal);
+      
+      &:hover {
+        background: var(--accent-dark, #e55a5a);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+      }
+    }
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .payment-header {
+    h2 {
+      font-size: 2rem;
+    }
+    
+    .payment-description {
+      font-size: 1.3rem;
+    }
+  }
+  
+  .payment-method {
+    padding: 1.2rem;
+    gap: 1rem;
+    
+    .method-icon {
+      width: 50px;
+      height: 50px;
+    }
+    
+    .method-content {
+      h3 {
+        font-size: 1.1rem;
+      }
+      
+      p {
+        font-size: 0.9rem;
+      }
+    }
+  }
+  
+  .payment-contact,
+  .payment-instructions {
+    padding: 1.5rem;
+  }
+}
+
+/* Dark mode overrides */
+.dark-theme {
+  .payment-method {
+    background: var(--card-bg);
+    border-color: var(--border-dark);
+    
+    &:hover {
+      border-color: var(--accent);
+    }
+  }
+  
+  .payment-contact,
+  .payment-instructions {
+    background: var(--card-bg);
+  }
+  
+  .contact-item {
+    background: var(--background);
   }
 }
 
