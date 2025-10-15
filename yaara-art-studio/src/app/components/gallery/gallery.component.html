@@ -10,7 +10,7 @@
     
     <div class="gallery-grid">
       <div class="gallery-item fade-in-up" 
-           *ngFor="let artwork of artworks; let i = index"
+           *ngFor="let artwork of displayedArtworks; let i = index"
            (click)="openLightbox(i)"
            [attr.data-delay]="i * 100">
         <div class="artwork-image">
@@ -28,6 +28,17 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Load More Button -->
+    <div class="load-more-section" *ngIf="canLoadMore">
+      <button class="btn btn-primary" (click)="loadMoreArtworks()">
+        <span class="btn-text">הצג עוד</span>
+        <span class="btn-count">({{ remainingArtworksCount }} נוספות)</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="btn-icon">
+          <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
+        </svg>
+      </button>
     </div>
   </div>
   

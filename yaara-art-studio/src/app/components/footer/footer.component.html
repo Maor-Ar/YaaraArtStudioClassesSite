@@ -3,9 +3,9 @@
   <div class="container">
     <div class="footer-content">
       <div class="footer-brand">
-        <h3 class="footer-logo">סטודיו יערה</h3>
+        <h3 class="footer-logo">סטודיו בודה</h3>
         <p class="footer-description">
-          מרחב יצירתי ומעורר השראה לכל מי שרוצה לחוות את עולם הציור מזווית אחרת.
+          מכניסים אומנות לחיים.
         </p>
         <div class="footer-contact">
           <div class="contact-item">
@@ -43,9 +43,9 @@
         <div class="link-group">
           <h4>שירותים</h4>
           <ul>
-            <li><a href="#testimonials" (click)="scrollToSection('testimonials')">המלצות</a></li>
+            <li [hidden]="true"><a href="#testimonials" (click)="scrollToSection('testimonials')">המלצות</a></li>
             <li><a href="#contact" (click)="scrollToSection('contact')">צור קשר</a></li>
-            <li><a href="/payments">תשלומים</a></li>
+            <li><a routerLink="/payments">תשלומים</a></li>
             <li><a href="#contact">שיעור ניסיון</a></li>
           </ul>
         </div>

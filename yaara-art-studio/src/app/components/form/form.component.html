@@ -60,57 +60,34 @@
             </div>
             
             <div class="form-group">
-              <label for="experience" class="form-label">רמת ניסיון</label>
-              <select 
-                id="experience" 
-                formControlName="experience" 
-                class="form-select"
-              >
-                <option value="">בחרו רמת ניסיון</option>
-                <option value="beginner">מתחיל/ה</option>
-                <option value="intermediate">בינוני/ה</option>
-                <option value="advanced">מתקדם/ת</option>
-                <option value="professional">מקצועי/ת</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="lessonType" class="form-label">סוג שיעור</label>
-              <select 
-                id="lessonType" 
-                formControlName="lessonType" 
-                class="form-select"
-              >
-                <option value="">בחרו סוג שיעור</option>
-                <option value="oil-painting">ציור שמן</option>
-                <option value="watercolor">אקוורל</option>
-                <option value="acrylic">אקריליק</option>
-                <option value="pencil">עיפרון ופחם</option>
-                <option value="mixed">מעורב</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="lessonDate" class="form-label">בחר שיעור</label>
+              <label for="lessonDate" class="form-label">תאריך ושעה *</label>
               <select 
                 id="lessonDate" 
                 formControlName="lessonDate" 
                 class="form-select"
+                [class.error]="isFieldInvalid('lessonDate')"
               >
                 <option value="">בחרו תאריך ושעה</option>
                 <option *ngFor="let option of lessonOptions" [value]="option">{{ option }}</option>
               </select>
+              <div class="error-message" *ngIf="isFieldInvalid('lessonDate')">
+                בחירת תאריך ושעה הוא שדה חובה
+              </div>
             </div>
             
             <div class="form-group full-width">
-              <label for="message" class="form-label">הודעה</label>
+              <label for="background" class="form-label">רקע בציור *</label>
               <textarea 
-                id="message" 
-                formControlName="message" 
+                id="background" 
+                formControlName="background" 
                 class="form-textarea"
                 rows="4"
-                placeholder="ספרו לנו על עצמכם, המטרות שלכם בציור, או כל דבר אחר שתרצו לשתף..."
+                placeholder="כתבו לנו כמה מילים על הרקע שלכם בציור..."
+                [class.error]="isFieldInvalid('background')"
               ></textarea>
+              <div class="error-message" *ngIf="isFieldInvalid('background')">
+                תיאור הרקע בציור הוא שדה חובה
+              </div>
             </div>
           </div>
           
@@ -147,7 +124,7 @@
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
               </svg>
-              קבוצות קטנות ואינטימיות
+              טכניקות ותרגילים מגוונים
             </li>
             <li>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">

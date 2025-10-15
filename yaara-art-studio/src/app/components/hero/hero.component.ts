@@ -31,7 +31,6 @@ export class HeroComponent implements OnInit, AfterViewInit {
   constructor(public themeService: ThemeService) {}
 
   ngOnInit(): void {
-    console.log('Hero component initialized');
   }
 
   ngAfterViewInit(): void {

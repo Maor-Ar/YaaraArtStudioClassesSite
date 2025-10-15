@@ -25,24 +25,8 @@ export class ThemeService {
   }
 
   private getInitialTheme(): Theme {
-    // Check if we're in browser environment
-    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
-      return 'light'; // Default for SSR
-    }
-    
-    // Check localStorage first
-    const savedTheme = localStorage.getItem(this.THEME_KEY) as Theme;
-    if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
-      return savedTheme;
-    }
-    
-    // Check system preference
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
-    
-    // Default to light
-    return 'light';
+    // Always return dark mode - no client storage needed
+    return 'dark';
   }
 
   public toggleTheme(): void {
@@ -54,10 +38,7 @@ export class ThemeService {
     this._currentTheme.set(theme);
     this.applyTheme(theme);
     
-    // Only save to localStorage if we're in browser environment
-    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
-      localStorage.setItem(this.THEME_KEY, theme);
-    }
+    // No localStorage saving - always start with dark mode
   }
 
   private applyTheme(theme: Theme): void {

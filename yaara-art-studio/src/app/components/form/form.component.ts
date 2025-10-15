@@ -37,10 +37,8 @@ export class FormComponent {
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       phone: ['', [Validators.required, Validators.pattern(/^[0-9\-\+\s\(\)]+$/)]],
-      experience: [''],
-      lessonType: [''],
-      lessonDate: [''],
-      message: ['']
+      lessonDate: ['', [Validators.required]],
+      background: ['', [Validators.required, Validators.minLength(10)]]
     });
   }
 
@@ -134,10 +132,8 @@ export class FormComponent {
       firstName: formData.firstName,
       lastName: formData.lastName,
       phone: formData.phone,
-      experience: formData.experience,
-      lessonType: formData.lessonType,
       lessonDate: formData.lessonDate,
-      message: formData.message
+      background: formData.background
     });
     
     // Create FormData object for Formspree
@@ -148,10 +144,8 @@ export class FormComponent {
     formDataToSend.append('firstName', formData.firstName || '');
     formDataToSend.append('lastName', formData.lastName || '');
     formDataToSend.append('phone', formData.phone || '');
-    formDataToSend.append('experience', formData.experience || '');
-    formDataToSend.append('lessonType', formData.lessonType || '');
     formDataToSend.append('lessonDate', formData.lessonDate || '');
-    formDataToSend.append('message', formData.message || '');
+    formDataToSend.append('background', formData.background || '');
     
     console.log('Sending data to Formspree...');
     

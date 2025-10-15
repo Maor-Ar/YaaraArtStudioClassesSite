@@ -14,7 +14,7 @@
         <a href="#about" class="nav-link">אודות</a>
         <a href="#pillars" class="nav-link">מה תמצאו</a>
         <a href="#gallery" class="nav-link">גלריה</a>
-        <a href="#testimonials" class="nav-link">המלצות</a>
+        <a href="#testimonials" class="nav-link" [hidden]="true">המלצות</a>
         <a href="#contact" class="nav-link">צור קשר</a>
         <app-theme-switcher [showLabel]="false" [compact]="true"></app-theme-switcher>
       </div>
@@ -38,7 +38,7 @@
       <a href="#about" class="mobile-nav-link" (click)="closeMobileMenu()">אודות</a>
       <a href="#pillars" class="mobile-nav-link" (click)="closeMobileMenu()">מה תמצאו</a>
       <a href="#gallery" class="mobile-nav-link" (click)="closeMobileMenu()">גלריה</a>
-      <a href="#testimonials" class="mobile-nav-link" (click)="closeMobileMenu()">המלצות</a>
+      <a href="#testimonials" class="mobile-nav-link" (click)="closeMobileMenu()" [hidden]="true">המלצות</a>
       <a href="#contact" class="mobile-nav-link" (click)="closeMobileMenu()">צור קשר</a>
       
       <!-- Mobile Theme Switcher -->
