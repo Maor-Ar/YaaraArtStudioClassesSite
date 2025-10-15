@@ -1,21 +1,39 @@
-import { Component, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Output, EventEmitter, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { StripeService, PaymentResult } from '../../services/stripe.service';
 
 @Component({
   selector: 'app-payment',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './payment.component.html',
   styleUrl: './payment.component.scss'
 })
 export class PaymentComponent implements OnInit {
   @Output() paymentSuccess = new EventEmitter<void>();
+  @ViewChild('applePayButton', { static: false }) applePayButton!: ElementRef;
+  @ViewChild('cardElement', { static: false }) cardElement!: ElementRef;
+  
   showSuccessMessage = false;
+  showCreditCardForm = false;
+  isApplePayAvailable = false;
+  isLoading = false;
+  paymentError = '';
+  
+  // Credit card form data
+  cardholderName = '';
+  email = '';
+  phone = '';
 
-  constructor(private router: Router) {}
-  ngOnInit(): void {
+  constructor(
+    private router: Router,
+    private stripeService: StripeService
+  ) {}
+  async ngOnInit(): Promise<void> {
     window.scrollTo(0, 0);
+    await this.checkApplePayAvailability();
   }
   // Phone number from contact section
   private readonly phoneNumber = '0556646033'; // Remove dashes for deep links
@@ -132,5 +150,146 @@ export class PaymentComponent implements OnInit {
    */
   navigateBackToForm(): void {
     this.router.navigate(['/'], { fragment: 'contact' });
+  }
+
+  /**
+   * Check if Apple Pay is available
+   */
+  private async checkApplePayAvailability(): Promise<void> {
+    try {
+      this.isApplePayAvailable = await this.stripeService.isApplePayAvailable();
+    } catch (error) {
+      console.error('Error checking Apple Pay availability:', error);
+      this.isApplePayAvailable = false;
+    }
+  }
+
+  /**
+   * Show credit card payment form
+   */
+  showCreditCardPayment(): void {
+    this.showCreditCardForm = true;
+    this.paymentError = '';
+    
+    // Initialize Stripe elements after view is updated
+    setTimeout(() => {
+      this.initializeCreditCardForm();
+    }, 100);
+  }
+
+  /**
+   * Initialize credit card form with Stripe Elements
+   */
+  private initializeCreditCardForm(): void {
+    const elements = this.stripeService.createElements();
+    if (!elements) return;
+
+    const cardElement = elements.create('card', {
+      style: {
+        base: {
+          fontSize: '16px',
+          color: '#424770',
+          fontFamily: 'system-ui, sans-serif',
+          '::placeholder': {
+            color: '#aab7c4',
+          },
+        },
+      },
+    });
+
+    cardElement.mount(this.cardElement.nativeElement);
+  }
+
+  /**
+   * Process credit card payment
+   */
+  async processCreditCardPayment(): Promise<void> {
+    if (!this.cardholderName || !this.email) {
+      this.paymentError = 'אנא מלא את כל השדות הנדרשים';
+      return;
+    }
+
+    this.isLoading = true;
+    this.paymentError = '';
+
+    try {
+      // Create payment intent (in real app, this would call your backend)
+      const paymentIntent = await this.stripeService.createPaymentIntent(this.lessonPrice * 100); // Convert to agorot
+      
+      // Get the card element
+      const elements = this.stripeService.getElements();
+      if (!elements) throw new Error('Stripe elements not initialized');
+
+      const cardElement = elements.getElement('card');
+      if (!cardElement) throw new Error('Card element not found');
+
+      // Confirm payment
+      const result: PaymentResult = await this.stripeService.confirmCardPayment(
+        paymentIntent.client_secret,
+        cardElement,
+        {
+          name: this.cardholderName,
+          email: this.email,
+          phone: this.phone || this.phoneNumberFormatted,
+        }
+      );
+
+      if (result.success) {
+        this.onPaymentSuccess();
+      } else {
+        this.paymentError = result.error || 'שגיאה בעיבוד התשלום';
+      }
+    } catch (error) {
+      console.error('Credit card payment error:', error);
+      this.paymentError = 'שגיאה בעיבוד התשלום';
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  /**
+   * Process Apple Pay payment
+   */
+  async processApplePayPayment(): Promise<void> {
+    this.isLoading = true;
+    this.paymentError = '';
+
+    try {
+      // Mount Apple Pay button
+      if (this.applePayButton) {
+        await this.stripeService.mountApplePayButton(this.applePayButton.nativeElement);
+      }
+    } catch (error) {
+      console.error('Apple Pay payment error:', error);
+      this.paymentError = 'שגיאה בעיבוד תשלום Apple Pay';
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  /**
+   * Hide credit card form
+   */
+  hideCreditCardForm(): void {
+    this.showCreditCardForm = false;
+    this.paymentError = '';
+    this.cardholderName = '';
+    this.email = '';
+    this.phone = '';
+  }
+
+  /**
+   * Get payment method display info
+   */
+  getPaymentMethodInfo(method: string): { name: string; description: string; recommended?: boolean } {
+    const methods = {
+      bit: { name: 'Bit', description: 'תשלום מאובטח עם Bit', recommended: true },
+      paybox: { name: 'PayBox', description: 'תשלום מאובטח עם PayBox', recommended: true },
+      kashkash: { name: 'Kashkash', description: 'תשלום מאובטח עם Kashkash', recommended: true },
+      applePay: { name: 'Apple Pay', description: 'תשלום מאובטח עם Apple Pay' },
+      creditCard: { name: 'כרטיס אשראי', description: 'כרטיסי אשראי בינלאומיים' }
+    };
+    
+    return methods[method as keyof typeof methods] || { name: method, description: '' };
   }
 }
