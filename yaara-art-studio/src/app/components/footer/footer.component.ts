@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, Inject, PLATFORM_ID } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PopupComponent } from '../popup/popup.component';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-footer',
@@ -12,6 +13,8 @@ import { PopupComponent } from '../popup/popup.component';
 export class FooterComponent {
   showPrivacyPopup = false;
   showTermsPopup = false;
+
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
 
   privacyPolicyContent = `
     <h1>מדיניות פרטיות</h1>
@@ -86,6 +89,10 @@ export class FooterComponent {
   `;
 
   scrollToSection(sectionId: string): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ 

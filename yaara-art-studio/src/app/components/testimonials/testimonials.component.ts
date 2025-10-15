@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 interface Testimonial {
   text: string;
@@ -17,6 +17,7 @@ interface Testimonial {
   styleUrl: './testimonials.component.scss'
 })
 export class TestimonialsComponent {
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
   testimonials: Testimonial[] = [
     {
       text: "הרגשתי שגיליתי מחדש את היצירה שלי. יערה ליוותה אותי בכל שלב עם סבלנות רבה ונתנה לי כלים מקצועיים להתפתח.",
@@ -69,6 +70,10 @@ export class TestimonialsComponent {
   }
 
   scrollToSection(sectionId: string): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ 

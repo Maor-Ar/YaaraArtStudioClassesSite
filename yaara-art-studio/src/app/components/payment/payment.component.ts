@@ -1,5 +1,5 @@
-import { Component, Output, EventEmitter, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Output, EventEmitter, OnInit, ViewChild, ElementRef, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { StripeService, PaymentResult } from '../../services/stripe.service';
@@ -29,11 +29,14 @@ export class PaymentComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private stripeService: StripeService
+    private stripeService: StripeService,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
   async ngOnInit(): Promise<void> {
-    window.scrollTo(0, 0);
-    await this.checkApplePayAvailability();
+    if (isPlatformBrowser(this.platformId)) {
+      window.scrollTo(0, 0);
+      await this.checkApplePayAvailability();
+    }
   }
   // Phone number from contact section
   private readonly phoneNumber = '0556646033'; // Remove dashes for deep links
@@ -80,6 +83,11 @@ export class PaymentComponent implements OnInit {
    * Open payment app with fallback to web version
    */
   private openPaymentApp(appUrl: string, webUrl: string, appName: string): void {
+    // Only execute in browser environment
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    
     // Try to open the mobile app
     const appWindow = window.open(appUrl, '_blank');
     

@@ -1,5 +1,5 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({
@@ -26,18 +26,24 @@ export class ModalComponent implements OnInit, OnDestroy {
   @Input() content = '';
   @Output() closeModal = new EventEmitter<void>();
 
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+
   ngOnInit(): void {
-    if (this.isOpen) {
+    if (this.isOpen && isPlatformBrowser(this.platformId)) {
       document.body.style.overflow = 'hidden';
     }
   }
 
   ngOnDestroy(): void {
-    document.body.style.overflow = 'auto';
+    if (isPlatformBrowser(this.platformId)) {
+      document.body.style.overflow = 'auto';
+    }
   }
 
   onClose(): void {
-    document.body.style.overflow = 'auto';
+    if (isPlatformBrowser(this.platformId)) {
+      document.body.style.overflow = 'auto';
+    }
     this.closeModal.emit();
   }
 
