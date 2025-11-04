@@ -38,41 +38,56 @@ export class FormComponent {
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       phone: ['', [Validators.required, Validators.pattern(/^[0-9\-\+\s\(\)]+$/)]],
       lessonDate: ['', [Validators.required]],
-      background: ['', [Validators.required, Validators.minLength(10)]]
+      background: ['', [Validators.required, Validators.minLength(2)]]
     });
   }
 
   private generateLessonOptions(): string[] {
-    const options: string[] = [];
-    const today = new Date();
-    
-    // Find the next Tuesday
-    let nextTuesday = new Date(today);
-    const daysUntilTuesday = (2 - today.getDay() + 7) % 7; // Tuesday is day 2
-    if (daysUntilTuesday === 0 && today.getDay() !== 2) {
-      nextTuesday.setDate(today.getDate() + 7); // If today is Tuesday, get next Tuesday
+  const options: string[] = [];
+  const today = new Date();
+  const studioOpeningDate = new Date('2025-12-07'); // Studio opening date
+  
+  // Determine the starting Sunday
+  let startingSunday: Date;
+  
+  if (today < studioOpeningDate) {
+    // Before studio opens, start with December 7, 2025 (first Sunday)
+    startingSunday = new Date('2025-12-07');
+  } else {
+    // After studio opens, find the next Sunday from today
+    startingSunday = new Date(today);
+    const daysUntilSunday = (7 - today.getDay()) % 7; // Sunday is day 0
+    if (daysUntilSunday === 0 && today.getDay() === 0) {
+      // If today is Sunday, check if we should include it or move to next Sunday
+      // Include today only if it's still before the first class time
+      const todayTime = today.getHours() * 60 + today.getMinutes();
+      if (todayTime >= 18 * 60) {
+        // After 18:00, move to next Sunday
+        startingSunday.setDate(today.getDate() + 7);
+      }
     } else {
-      nextTuesday.setDate(today.getDate() + daysUntilTuesday);
+      startingSunday.setDate(today.getDate() + daysUntilSunday);
     }
-    
-    // Generate options for next 2 Tuesdays
-    for (let i = 0; i < 2; i++) {
-      const tuesday = new Date(nextTuesday);
-      tuesday.setDate(nextTuesday.getDate() + (i * 7));
-      
-      const dateStr = tuesday.toLocaleDateString('he-IL', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
-      
-      // Add two time slots for each Tuesday
-      options.push(`${dateStr} 18:00-19:30`);
-      options.push(`${dateStr} 19:30-21:00`);
-    }
-    
-    return options;
   }
+  
+  // Generate options for next 2 Sundays
+  for (let i = 0; i < 2; i++) {
+    const sunday = new Date(startingSunday);
+    sunday.setDate(startingSunday.getDate() + (i * 7));
+    
+    const dateStr = sunday.toLocaleDateString('he-IL', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+    
+    // Add two time slots for each Sunday
+    options.push(`${dateStr} 18:00-19:30`);
+    options.push(`${dateStr} 19:30-21:00`);
+  }
+  
+  return options;
+}
 
   isFieldInvalid(fieldName: string): boolean {
     const field = this.registrationForm.get(fieldName);
