@@ -56,11 +56,10 @@
       </div>
       
       <div class="lightbox-info" *ngIf="currentArtwork">
-        <h3 class="lightbox-title">{{ currentArtwork.title }}</h3>
-        <p class="lightbox-description">{{ currentArtwork.description }}</p>
+
         <div class="lightbox-details">
-          <span class="detail-item">טכניקה: {{ currentArtwork.technique }}</span>
-          <span class="detail-item">גודל: {{ currentArtwork.size }}</span>
+          <span class="detail-item">טכניקה: {{ currentArtwork.title }}</span>
+          <span class="detail-item">גודל: {{ currentArtwork.description }}</span>
         </div>
       </div>
       
