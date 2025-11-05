@@ -100,6 +100,7 @@ export class PaymentSuccessComponent implements OnInit {
     }
 
     const name = this.fullName || 'שיעור ניסיון';
+    const studioAddress = 'תל חי 39 כפר סבא, קומה 1';
     
     // Parse lesson date (format: "DD/MM/YYYY HH:MM-HH:MM")
     // Example: "07/12/2025 18:00-19:30"
@@ -122,13 +123,17 @@ export class PaymentSuccessComponent implements OnInit {
     const endDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(endHour), parseInt(endMinute));
     
     const summary = encodeURIComponent(`שיעור ניסיון - סטודיו בודה: ${name}`);
-    const description = encodeURIComponent(`שיעור ניסיון בסטודיו בודה`);
+    const location = encodeURIComponent(studioAddress);
+    let description = encodeURIComponent(`שיעור ניסיון בסטודיו בודה`);
+    if (this.background) {
+      description = encodeURIComponent(`שיעור ניסיון בסטודיו בודה\nרקע: ${this.background}`);
+    }
     
     // Format dates for Google Calendar (YYYYMMDDTHHMMSS)
     const startStr = startDate.toISOString().replace(/-|:|\.\d{3}/g, '');
     const endStr = endDate.toISOString().replace(/-|:|\.\d{3}/g, '');
     
-    const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${summary}&dates=${startStr}/${endStr}&details=${description}`;
+    const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${summary}&dates=${startStr}/${endStr}&details=${description}&location=${location}`;
     
     window.open(url, '_blank');
   }
