@@ -181,6 +181,19 @@ export class FormComponent {
         const result = await response.json();
         console.log('Formspree response:', result);
         
+        // Save form data to localStorage before navigating to payment
+        const formData = this.registrationForm.value;
+        const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+        const nowIso = new Date().toISOString();
+        
+        localStorage.setItem('formFirstName', formData.firstName || '');
+        localStorage.setItem('formLastName', formData.lastName || '');
+        localStorage.setItem('formFullName', fullName);
+        localStorage.setItem('formPhone', formData.phone || '');
+        localStorage.setItem('formLessonDate', formData.lessonDate || '');
+        localStorage.setItem('formBackground', formData.background || '');
+        localStorage.setItem('formSubmissionTime', nowIso);
+        
         // Navigate to payment page
         this.isSubmitting = false;
         this.registrationForm.reset();

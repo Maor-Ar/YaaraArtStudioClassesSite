@@ -1,0 +1,133 @@
+<!-- Payment Success Page -->
+<div class="payment-success-page">
+  <!-- Header/Navbar -->
+  <app-header></app-header>
+
+  <!-- Main Content -->
+  <main class="payment-success-main">
+    <div class="container">
+      <div class="success-content fade-in-up">
+        <!-- Success Icon -->
+        <div class="success-icon">
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+
+        <!-- Success Message -->
+        <h1 class="success-title">התשלום הושלם בהצלחה!</h1>
+        <p class="success-subtitle">תודה על הרשמתך לשיעור ניסיון</p>
+
+        <!-- Reserved Class Information -->
+        <div class="reserved-class-section" *ngIf="lessonDate">
+          <h3 class="section-title">פרטי השיעור שזמנת</h3>
+          <div class="class-details">
+            <div class="detail-card">
+              <div class="detail-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+              </div>
+              <div class="detail-content">
+                <h3 class="detail-label">שם</h3>
+                <p class="detail-value">{{ fullName || 'לא צוין' }}</p>
+              </div>
+            </div>
+
+            <div class="detail-card" *ngIf="phone">
+              <div class="detail-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                </svg>
+              </div>
+              <div class="detail-content">
+                <h3 class="detail-label">טלפון</h3>
+                <p class="detail-value">{{ phone }}</p>
+              </div>
+            </div>
+
+            <div class="detail-card highlight-card" *ngIf="lessonDate">
+              <div class="detail-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                </svg>
+              </div>
+              <div class="detail-content">
+                <h3 class="detail-label">תאריך ושעה של השיעור</h3>
+                <p class="detail-value">{{ lessonDate }}</p>
+              </div>
+            </div>
+
+            <div class="detail-card" *ngIf="background">
+              <div class="detail-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              </div>
+              <div class="detail-content">
+                <h3 class="detail-label">רקע בציור</h3>
+                <p class="detail-value">{{ background }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Information -->
+        <div class="payment-info-section" *ngIf="paymentDateTime">
+          <h3 class="section-title">פרטי התשלום</h3>
+          <div class="detail-card">
+            <div class="detail-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+            <div class="detail-content">
+              <h3 class="detail-label">תאריך התשלום</h3>
+              <p class="detail-value">{{ formattedDate }} בשעה {{ formattedTime }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- No Data Message -->
+        <div class="no-data-message" *ngIf="!lessonDate && !paymentDateTime">
+          <p>תודה על התשלום! נחזור אליך בהקדם לאישור השיעור.</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button class="btn btn-primary calendar-btn" (click)="addToCalendar()" [disabled]="!lessonDate">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+            </svg>
+            <span>הוסף ליומן</span>
+          </button>
+
+          <button class="btn btn-secondary home-btn" (click)="navigateToHome()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+            </svg>
+            <span>חזרה לעמוד הבית</span>
+          </button>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="success-info">
+          <div class="info-card">
+            <h3>מה הלאה?</h3>
+            <ul>
+              <li>השיעור שלך נשמר בהצלחה!</li>
+              <li>נצטרך ליצור איתך קשר תוך 24 שעות לאישור סופי</li>
+              <li>אם יש לך שאלות, צור קשר בטלפון: 055-664-6033</li>
+              <li>ניתן להוסיף את השיעור ליומן שלך בלחיצה על הכפתור למעלה</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <app-footer></app-footer>
+</div>
+
