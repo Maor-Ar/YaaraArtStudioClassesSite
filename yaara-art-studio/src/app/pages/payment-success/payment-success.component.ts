@@ -121,8 +121,8 @@ export class PaymentSuccessComponent implements OnInit {
     const startDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(startHour), parseInt(startMinute));
     const endDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(endHour), parseInt(endMinute));
     
-    const summary = encodeURIComponent(`שיעור ניסיון - סטודיו יערה: ${name}`);
-    const description = encodeURIComponent(`שיעור ניסיון בסטודיו יערה${this.background ? '\nרקע: ' + this.background : ''}`);
+    const summary = encodeURIComponent(`שיעור ניסיון - סטודיו בודה: ${name}`);
+    const description = encodeURIComponent(`שיעור ניסיון בסטודיו בודה`);
     
     // Format dates for Google Calendar (YYYYMMDDTHHMMSS)
     const startStr = startDate.toISOString().replace(/-|:|\.\d{3}/g, '');
