@@ -6,6 +6,7 @@
     "start": "ng serve",
     "build": "ng build",
     "build:github-pages": "node build-github-pages.js",
+    "build:custom-domain": "node build-custom-domain.js",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:yaara-art-studio": "node dist/yaara-art-studio/server/server.mjs"

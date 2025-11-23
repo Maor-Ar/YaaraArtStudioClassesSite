@@ -33,7 +33,7 @@ jobs:
     - name: Build Angular app
       run: |
         cd yaara-art-studio
-        npm run build:github-pages
+        npm run build:custom-domain
         
     - name: Setup Pages
       uses: actions/configure-pages@v4
