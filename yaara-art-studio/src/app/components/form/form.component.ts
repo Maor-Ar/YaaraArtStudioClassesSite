@@ -153,8 +153,8 @@ export class FormComponent {
     
     // Create FormData object for Formspree
     const formDataToSend = new FormData();
-    formDataToSend.append('_subject', 'הרשמה חדשה לשיעור ניסיון - סטודיו יערה');
-    formDataToSend.append('_replyto', 'noreply@yaaraartstudio.com');
+    formDataToSend.append('_subject', 'הרשמה חדשה לשיעור ניסיון - סטודיו בודה');
+    formDataToSend.append('_replyto', 'noreply@studiobuda.co.il');
     formDataToSend.append('_captcha', 'false');
     formDataToSend.append('firstName', formData.firstName || '');
     formDataToSend.append('lastName', formData.lastName || '');

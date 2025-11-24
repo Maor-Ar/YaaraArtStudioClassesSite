@@ -47,7 +47,7 @@ export class StripeService {
       country: 'IL',
       currency: 'ils',
       total: {
-        label: 'שיעור ניסיון - סטודיו יערה',
+        label: 'שיעור ניסיון - סטודיו בודה',
         amount: 5000, // Amount in agorot (50 ILS = 5000 agorot)
       },
       requestPayerName: true,

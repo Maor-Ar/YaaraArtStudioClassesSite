@@ -7,17 +7,17 @@ export const routes: Routes = [
   {
     path: '',
     component: MainPageComponent,
-    title: 'סטודיו יערה - שיעורי ציור חווייתיים'
+    title: 'סטודיו בודה - שיעורי ציור חווייתיים'
   },
   {
     path: 'payments',
     component: PaymentPageComponent,
-    title: 'תשלומים - סטודיו יערה'
+    title: 'תשלומים - סטודיו בודה'
   },
   {
     path: 'payment-success',
     component: PaymentSuccessComponent,
-    title: 'תשלום הושלם בהצלחה - סטודיו יערה'
+    title: 'תשלום הושלם בהצלחה - סטודיו בודה'
   },
   {
     path: '**',
