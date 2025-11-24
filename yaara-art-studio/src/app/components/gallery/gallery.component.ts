@@ -22,11 +22,6 @@ export class GalleryComponent {
 
   artworks: Artwork[] = [
     {
-      title: "פסטל שמן על קרטון ביצוע",
-      description: "50X65 ס״מ",
-      imageUrl: "https://i.imgur.com/mv2DaGr.jpeg"
-    },
-    {
       title: "פסטל שמן על בריסטול",
       description: "42X30 ס״מ",
       imageUrl: "https://i.imgur.com/tEtzdsd.jpeg"
@@ -40,12 +35,6 @@ export class GalleryComponent {
       title: "עפרונות צבעוניים על בריסטול",
       description: "30X42 ס״מ",
       imageUrl: "https://github.com/user-attachments/assets/e2f56a0a-016d-4224-8ffb-60e29bb48371"
-    },
-    // New unique images from GitHub issue
-    {
-      title: "אקריליק על קנבס",
-      description: "50X60 ס״מ",
-      imageUrl: "https://github.com/user-attachments/assets/24c737c6-5154-43e1-9936-b4ffec1c74b6"
     },
     {
       title: "שמן על בד",

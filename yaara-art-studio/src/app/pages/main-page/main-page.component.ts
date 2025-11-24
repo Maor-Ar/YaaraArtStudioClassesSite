@@ -6,6 +6,8 @@ import { HeroComponent } from '../../components/hero/hero.component';
 import { AboutComponent } from '../../components/about/about.component';
 import { PillarsComponent } from '../../components/pillars/pillars.component';
 import { GalleryComponent } from '../../components/gallery/gallery.component';
+import { ClassesAlternatingComponent } from '../../components/classes-alternating/classes-alternating.component';
+import { ClassesBackgroundComponent } from '../../components/classes-background/classes-background.component';
 import { TestimonialsComponent } from '../../components/testimonials/testimonials.component';
 import { FormComponent } from '../../components/form/form.component';
 
@@ -20,6 +22,8 @@ import { FormComponent } from '../../components/form/form.component';
     AboutComponent,
     PillarsComponent,
     GalleryComponent,
+    ClassesAlternatingComponent,
+    ClassesBackgroundComponent,
     TestimonialsComponent,
     FormComponent
   ],
@@ -28,4 +32,10 @@ import { FormComponent } from '../../components/form/form.component';
 })
 export class MainPageComponent {
   showWhatsAppButton = true;
+  showAlternatingComponent: boolean;
+
+  constructor() {
+    // Randomly choose which component to show (50/50 chance)
+    this.showAlternatingComponent = Math.random() < 0.5;
+  }
 }

@@ -1,0 +1,42 @@
+<!-- Classes Section - Background Image Layout -->
+<section class="classes-background">
+  <div class="container">
+    <div class="classes-header">
+      <h2 class="section-title fade-in-up">השיעורים שיש אצלנו</h2>
+    </div>
+    
+    <div class="classes-list">
+      <div class="class-item fade-in-up" 
+           *ngFor="let artClass of classes; let i = index">
+        <div class="class-background-image">
+          <img [src]="artClass.imageUrl" [alt]="artClass.title" class="bg-img">
+          <div class="image-overlay"></div>
+        </div>
+        
+        <div class="class-content-overlay">
+          <h3 class="class-title">{{ artClass.title }}</h3>
+          <p class="class-description">{{ artClass.description }}</p>
+          
+          <div class="class-schedule">
+            <div class="schedule-day">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/>
+              </svg>
+              <span>{{ artClass.days }}</span>
+            </div>
+            <div class="schedule-times">
+              <span *ngFor="let time of artClass.times" class="time-slot">{{ time }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="classes-footer fade-in-up">
+      <p class="footer-text">
+        סטודיו בודה מציע מגוון שיעורי ציור, ולכם יש את האופציה להיכנס לכל אחד שתבחרו, להחליף ביניהם, או לבוא לכולם!
+      </p>
+    </div>
+  </div>
+</section>
+
