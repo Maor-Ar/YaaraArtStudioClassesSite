@@ -1,8 +1,14 @@
-import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID, Renderer2 } from '@angular/core';
 import { CommonModule, isPlatformBrowser, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { HeaderComponent } from '../../components/header/header.component';
 import { FooterComponent } from '../../components/footer/footer.component';
+
+declare global {
+  interface Window {
+    fbq?: (...args: any[]) => void;
+  }
+}
 
 @Component({
   selector: 'app-payment-success',
@@ -28,7 +34,8 @@ export class PaymentSuccessComponent implements OnInit {
 
   constructor(
     private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private renderer: Renderer2
   ) {}
 
   ngOnInit(): void {
@@ -36,6 +43,7 @@ export class PaymentSuccessComponent implements OnInit {
       window.scrollTo(0, 0);
       this.loadPaymentData();
       this.loadFormData();
+      this.trackMetaPixelPurchase();
     }
   }
 
@@ -150,6 +158,33 @@ export class PaymentSuccessComponent implements OnInit {
    */
   navigateToPayment(): void {
     this.router.navigate(['/payments']);
+  }
+
+  /**
+   * Track Meta Pixel Purchase event using Renderer2
+   */
+  private trackMetaPixelPurchase(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    // Check if fbq is available on window object
+    if (typeof window !== 'undefined' && window.fbq && typeof window.fbq === 'function') {
+      // Value is 50 ILS for trial lesson
+      const value = 50;
+      
+      // Use Renderer2 to safely invoke the fbq function
+      try {
+        // Call fbq directly - it's safe to call since we've checked it exists
+        window.fbq('track', 'Purchase', {
+          value: value,
+          currency: 'ILS',
+          content_type: 'product'
+        });
+      } catch (error) {
+        console.error('Error tracking Meta Pixel Purchase event:', error);
+      }
+    }
   }
 }
 
