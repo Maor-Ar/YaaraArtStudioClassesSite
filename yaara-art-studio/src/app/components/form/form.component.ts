@@ -1,8 +1,14 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ViewChild, ElementRef, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { Router } from '@angular/router';
+
+declare global {
+  interface Window {
+    fbq?: (...args: any[]) => void;
+  }
+}
 
 @Component({
   selector: 'app-form',
@@ -30,7 +36,11 @@ export class FormComponent {
   showSuccessMessage = false;
   lessonOptions: string[] = [];
 
-  constructor(private fb: FormBuilder, private router: Router) {
+  constructor(
+    private fb: FormBuilder, 
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
     this.lessonOptions = this.generateLessonOptions();
     
     this.registrationForm = this.fb.group({
@@ -181,6 +191,9 @@ export class FormComponent {
         const result = await response.json();
         console.log('Formspree response:', result);
         
+        // Track Meta Pixel Lead event
+        this.trackMetaPixelLead();
+        
         // Save form data to localStorage before navigating to payment
         const formData = this.registrationForm.value;
         const fullName = `${formData.firstName} ${formData.lastName}`.trim();
@@ -211,6 +224,25 @@ export class FormComponent {
       console.error('Network error submitting form:', error);
       this.isSubmitting = false;
       alert('שגיאת רשת. אנא בדקו את החיבור לאינטרנט ונסו שוב.');
+    }
+  }
+
+  /**
+   * Track Meta Pixel Lead event
+   */
+  private trackMetaPixelLead(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    // Check if fbq is available on window object
+    if (typeof window !== 'undefined' && window.fbq && typeof window.fbq === 'function') {
+      try {
+        // Call fbq to track Lead event
+        window.fbq('track', 'Lead');
+      } catch (error) {
+        console.error('Error tracking Meta Pixel Lead event:', error);
+      }
     }
   }
 }

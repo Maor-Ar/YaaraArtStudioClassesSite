@@ -4,10 +4,10 @@
 <main>
   <app-hero></app-hero>
   <app-about></app-about>
-  <app-pillars></app-pillars>
-  <app-gallery></app-gallery>
   <app-classes-alternating *ngIf="showAlternatingComponent"></app-classes-alternating>
   <app-classes-background *ngIf="!showAlternatingComponent"></app-classes-background>
+  <app-pillars></app-pillars>
+  <app-gallery></app-gallery>
   <app-testimonials [hidden]="true"></app-testimonials>
   <app-form></app-form>
   <app-footer></app-footer>
