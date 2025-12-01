@@ -43,6 +43,16 @@ export class PaymentSuccessComponent implements OnInit {
       window.scrollTo(0, 0);
       this.loadPaymentData();
       this.loadFormData();
+      
+      // Check if Meta Pixel is loaded before tracking
+      console.log('🟢 [Meta Pixel] Payment success component initialized');
+      console.log('🟢 [Meta Pixel] Checking fbq availability on init...');
+      if (typeof window !== 'undefined' && window.fbq) {
+        console.log('✅ [Meta Pixel] fbq is available, proceeding with tracking');
+      } else {
+        console.warn('⚠️ [Meta Pixel] fbq is NOT available on init, will retry');
+      }
+      
       this.trackMetaPixelPurchase();
     }
   }
@@ -164,26 +174,62 @@ export class PaymentSuccessComponent implements OnInit {
    * Track Meta Pixel Purchase event using Renderer2
    */
   private trackMetaPixelPurchase(): void {
+    console.log('🟢 [Meta Pixel] trackMetaPixelPurchase called');
+    
     if (!isPlatformBrowser(this.platformId)) {
+      console.warn('🟢 [Meta Pixel] Not in browser platform, skipping');
       return;
     }
+
+    console.log('🟢 [Meta Pixel] Checking if fbq is available...');
+    console.log('🟢 [Meta Pixel] typeof window:', typeof window);
+    console.log('🟢 [Meta Pixel] window.fbq exists:', typeof window !== 'undefined' && !!window.fbq);
+    console.log('🟢 [Meta Pixel] window.fbq type:', typeof window !== 'undefined' && window.fbq ? typeof window.fbq : 'N/A');
 
     // Check if fbq is available on window object
     if (typeof window !== 'undefined' && window.fbq && typeof window.fbq === 'function') {
       // Value is 50 ILS for trial lesson
       const value = 50;
+      const purchaseData = {
+        value: value,
+        currency: 'ILS',
+        content_type: 'product'
+      };
+      
+      console.log('🟢 [Meta Pixel] Calling fbq("track", "Purchase", ...) with data:', purchaseData);
       
       // Use Renderer2 to safely invoke the fbq function
       try {
         // Call fbq directly - it's safe to call since we've checked it exists
-        window.fbq('track', 'Purchase', {
-          value: value,
-          currency: 'ILS',
-          content_type: 'product'
-        });
+        window.fbq('track', 'Purchase', purchaseData);
+        console.log('✅ [Meta Pixel] Purchase event tracked successfully!');
       } catch (error) {
-        console.error('Error tracking Meta Pixel Purchase event:', error);
+        console.error('❌ [Meta Pixel] Error tracking Meta Pixel Purchase event:', error);
       }
+    } else {
+      console.warn('⚠️ [Meta Pixel] fbq is not available or not a function');
+      console.warn('⚠️ [Meta Pixel] This might mean Meta Pixel script has not loaded yet');
+      
+      // Try to wait a bit and retry (in case script is still loading)
+      setTimeout(() => {
+        if (typeof window !== 'undefined' && window.fbq && typeof window.fbq === 'function') {
+          const value = 50;
+          const purchaseData = {
+            value: value,
+            currency: 'ILS',
+            content_type: 'product'
+          };
+          console.log('🟢 [Meta Pixel] Retry: Calling fbq("track", "Purchase", ...) with data:', purchaseData);
+          try {
+            window.fbq('track', 'Purchase', purchaseData);
+            console.log('✅ [Meta Pixel] Purchase event tracked successfully on retry!');
+          } catch (error) {
+            console.error('❌ [Meta Pixel] Error on retry:', error);
+          }
+        } else {
+          console.error('❌ [Meta Pixel] fbq still not available after retry');
+        }
+      }, 1000);
     }
   }
 }

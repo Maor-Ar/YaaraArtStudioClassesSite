@@ -60,18 +60,34 @@
             </div>
             
             <div class="form-group">
-              <label for="lessonDate" class="form-label">תאריך ושעה *</label>
+              <label for="selectedDate" class="form-label">תאריך *</label>
               <select 
-                id="lessonDate" 
-                formControlName="lessonDate" 
+                id="selectedDate" 
+                formControlName="selectedDate" 
                 class="form-select"
-                [class.error]="isFieldInvalid('lessonDate')"
+                [class.error]="isFieldInvalid('selectedDate')"
               >
-                <option value="">בחרו תאריך ושעה</option>
-                <option *ngFor="let option of lessonOptions" [value]="option">{{ option }}</option>
+                <option value="">בחרו תאריך</option>
+                <option *ngFor="let date of availableDates" [value]="date">{{ date }}</option>
               </select>
-              <div class="error-message" *ngIf="isFieldInvalid('lessonDate')">
-                בחירת תאריך ושעה הוא שדה חובה
+              <div class="error-message" *ngIf="isFieldInvalid('selectedDate')">
+                בחירת תאריך הוא שדה חובה
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="selectedTime" class="form-label">שעה *</label>
+              <select 
+                id="selectedTime" 
+                formControlName="selectedTime" 
+                class="form-select"
+                [class.error]="isFieldInvalid('selectedTime')"
+              >
+                <option value="">בחרו שעה</option>
+                <option *ngFor="let time of availableTimes" [value]="time">{{ time }}</option>
+              </select>
+              <div class="error-message" *ngIf="isFieldInvalid('selectedTime')">
+                בחירת שעה הוא שדה חובה
               </div>
             </div>
             

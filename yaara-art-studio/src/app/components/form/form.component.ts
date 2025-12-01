@@ -34,70 +34,85 @@ export class FormComponent {
   registrationForm: FormGroup;
   isSubmitting = false;
   showSuccessMessage = false;
-  lessonOptions: string[] = [];
+  availableDates: string[] = [];
+  availableTimes: string[] = ['18:00-19:30', '19:30-21:00'];
 
   constructor(
     private fb: FormBuilder, 
     private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
-    this.lessonOptions = this.generateLessonOptions();
+    this.availableDates = this.generateAvailableDates();
     
     this.registrationForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       phone: ['', [Validators.required, Validators.pattern(/^[0-9\-\+\s\(\)]+$/)]],
-      lessonDate: ['', [Validators.required]],
+      selectedDate: ['', [Validators.required]],
+      selectedTime: ['', [Validators.required]],
       background: ['', [Validators.required, Validators.minLength(2)]]
     });
-  }
-
-  private generateLessonOptions(): string[] {
-  const options: string[] = [];
-  const today = new Date();
-  const studioOpeningDate = new Date('2025-12-07'); // Studio opening date
-  
-  // Determine the starting Sunday
-  let startingSunday: Date;
-  
-  if (today < studioOpeningDate) {
-    // Before studio opens, start with December 7, 2025 (first Sunday)
-    startingSunday = new Date('2025-12-07');
-  } else {
-    // After studio opens, find the next Sunday from today
-    startingSunday = new Date(today);
-    const daysUntilSunday = (7 - today.getDay()) % 7; // Sunday is day 0
-    if (daysUntilSunday === 0 && today.getDay() === 0) {
-      // If today is Sunday, check if we should include it or move to next Sunday
-      // Include today only if it's still before the first class time
-      const todayTime = today.getHours() * 60 + today.getMinutes();
-      if (todayTime >= 18 * 60) {
-        // After 18:00, move to next Sunday
-        startingSunday.setDate(today.getDate() + 7);
-      }
-    } else {
-      startingSunday.setDate(today.getDate() + daysUntilSunday);
+    
+    // Check if Meta Pixel is loaded on component initialization
+    if (isPlatformBrowser(this.platformId)) {
+      setTimeout(() => {
+        if (typeof window !== 'undefined' && window.fbq) {
+          console.log('✅ [Meta Pixel] fbq is available on form component init');
+        } else {
+          console.warn('⚠️ [Meta Pixel] fbq is NOT available on form component init');
+        }
+      }, 500);
     }
   }
-  
-  // Generate options for next 2 Sundays
-  for (let i = 0; i < 2; i++) {
-    const sunday = new Date(startingSunday);
-    sunday.setDate(startingSunday.getDate() + (i * 7));
+
+  private generateAvailableDates(): string[] {
+    const dates: string[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     
-    const dateStr = sunday.toLocaleDateString('he-IL', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    // Calculate two weeks from today
+    const twoWeeksFromNow = new Date(today);
+    twoWeeksFromNow.setDate(today.getDate() + 14);
     
-    // Add two time slots for each Sunday
-    options.push(`${dateStr} 18:00-19:30`);
-    options.push(`${dateStr} 19:30-21:00`);
+    // Dates to exclude
+    const excludedDates = [
+      new Date('2025-12-09'), // 9.12.2025
+      new Date('2025-12-10')  // 10.12.2025
+    ];
+    excludedDates.forEach(d => d.setHours(0, 0, 0, 0));
+    
+    // Days we want: Sunday (0), Tuesday (2), Wednesday (3)
+    const targetDays = [0, 2, 3];
+    
+    // Start from today and go up to two weeks ahead
+    const currentDate = new Date(today);
+    
+    while (currentDate <= twoWeeksFromNow) {
+      const dayOfWeek = currentDate.getDay();
+      
+      // Check if this is one of our target days
+      if (targetDays.includes(dayOfWeek)) {
+        // Check if this date should be excluded
+        const shouldExclude = excludedDates.some(excluded => {
+          return currentDate.getTime() === excluded.getTime();
+        });
+        
+        if (!shouldExclude) {
+          const dateStr = currentDate.toLocaleDateString('he-IL', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          });
+          dates.push(dateStr);
+        }
+      }
+      
+      // Move to next day
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    return dates;
   }
-  
-  return options;
-}
 
   isFieldInvalid(fieldName: string): boolean {
     const field = this.registrationForm.get(fieldName);
@@ -116,14 +131,14 @@ export class FormComponent {
       
       // Log form data that will be sent to Formspree
       const formData = this.registrationForm.value;
+      // Combine date and time for lessonDate
+      const lessonDate = `${formData.selectedDate} ${formData.selectedTime}`;
       console.log('Data being sent to Formspree:', {
         firstName: formData.firstName,
         lastName: formData.lastName,
         phone: formData.phone,
-        experience: formData.experience,
-        lessonType: formData.lessonType,
-        lessonDate: formData.lessonDate,
-        message: formData.message
+        lessonDate: lessonDate,
+        background: formData.background
       });
       
       // Submit the form using fetch API
@@ -153,11 +168,14 @@ export class FormComponent {
   private async submitToFormspree(): Promise<void> {
     const formData = this.registrationForm.value;
     
+    // Combine date and time for lessonDate
+    const lessonDate = `${formData.selectedDate} ${formData.selectedTime}`;
+    
     console.log('Preparing to submit form to Formspree with data:', {
       firstName: formData.firstName,
       lastName: formData.lastName,
       phone: formData.phone,
-      lessonDate: formData.lessonDate,
+      lessonDate: lessonDate,
       background: formData.background
     });
     
@@ -169,7 +187,7 @@ export class FormComponent {
     formDataToSend.append('firstName', formData.firstName || '');
     formDataToSend.append('lastName', formData.lastName || '');
     formDataToSend.append('phone', formData.phone || '');
-    formDataToSend.append('lessonDate', formData.lessonDate || '');
+    formDataToSend.append('lessonDate', lessonDate || '');
     formDataToSend.append('background', formData.background || '');
     
     console.log('Sending data to Formspree...');
@@ -192,6 +210,7 @@ export class FormComponent {
         console.log('Formspree response:', result);
         
         // Track Meta Pixel Lead event
+        console.log('🔵 [Meta Pixel] About to track Lead event...');
         this.trackMetaPixelLead();
         
         // Save form data to localStorage before navigating to payment
@@ -203,7 +222,7 @@ export class FormComponent {
         localStorage.setItem('formLastName', formData.lastName || '');
         localStorage.setItem('formFullName', fullName);
         localStorage.setItem('formPhone', formData.phone || '');
-        localStorage.setItem('formLessonDate', formData.lessonDate || '');
+        localStorage.setItem('formLessonDate', lessonDate || '');
         localStorage.setItem('formBackground', formData.background || '');
         localStorage.setItem('formSubmissionTime', nowIso);
         
@@ -231,18 +250,46 @@ export class FormComponent {
    * Track Meta Pixel Lead event
    */
   private trackMetaPixelLead(): void {
+    console.log('🔵 [Meta Pixel] trackMetaPixelLead called');
+    
     if (!isPlatformBrowser(this.platformId)) {
+      console.warn('🔵 [Meta Pixel] Not in browser platform, skipping');
       return;
     }
+
+    console.log('🔵 [Meta Pixel] Checking if fbq is available...');
+    console.log('🔵 [Meta Pixel] typeof window:', typeof window);
+    console.log('🔵 [Meta Pixel] window.fbq exists:', typeof window !== 'undefined' && !!window.fbq);
+    console.log('🔵 [Meta Pixel] window.fbq type:', typeof window !== 'undefined' && window.fbq ? typeof window.fbq : 'N/A');
 
     // Check if fbq is available on window object
     if (typeof window !== 'undefined' && window.fbq && typeof window.fbq === 'function') {
       try {
+        console.log('🔵 [Meta Pixel] Calling fbq("track", "Lead")...');
         // Call fbq to track Lead event
         window.fbq('track', 'Lead');
+        console.log('✅ [Meta Pixel] Lead event tracked successfully!');
       } catch (error) {
-        console.error('Error tracking Meta Pixel Lead event:', error);
+        console.error('❌ [Meta Pixel] Error tracking Meta Pixel Lead event:', error);
       }
+    } else {
+      console.warn('⚠️ [Meta Pixel] fbq is not available or not a function');
+      console.warn('⚠️ [Meta Pixel] This might mean Meta Pixel script has not loaded yet');
+      
+      // Try to wait a bit and retry (in case script is still loading)
+      setTimeout(() => {
+        if (typeof window !== 'undefined' && window.fbq && typeof window.fbq === 'function') {
+          console.log('🔵 [Meta Pixel] Retry: Calling fbq("track", "Lead")...');
+          try {
+            window.fbq('track', 'Lead');
+            console.log('✅ [Meta Pixel] Lead event tracked successfully on retry!');
+          } catch (error) {
+            console.error('❌ [Meta Pixel] Error on retry:', error);
+          }
+        } else {
+          console.error('❌ [Meta Pixel] fbq still not available after retry');
+        }
+      }, 1000);
     }
   }
 }
