@@ -118,7 +118,7 @@ export class HeroComponent implements OnInit, AfterViewInit {
 
   getLogoSrc(): string {
     return this.themeService.isDark()
-      ? 'assets/images/LogoDarkPurpleBG.jpeg'
+      ? 'assets/images/LogoDarkPurpleBG.png'
       : 'assets/images/LogoLightPinkBG.jpeg';
   }
 }
