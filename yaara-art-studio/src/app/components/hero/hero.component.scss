@@ -412,22 +412,12 @@
     width: 150px;
     height: 150px;
   }
-  
-  .paint-brush {
-    transform: rotate(-30deg) scale(0.5);
-  }
-  
-  .paint-palette {
-    width: 60px;
-    height: 60px;
-    bottom: -10px;
-    right: -10px;
-    padding: 10px;
-    
-    .color-dot {
-      width: 8px;
-      height: 8px;
-    }
+}
+
+/* Hide scroll indicator on small viewport heights */
+@media (max-height: 740px) {
+  .scroll-indicator {
+    display: none !important;
   }
 }
 
