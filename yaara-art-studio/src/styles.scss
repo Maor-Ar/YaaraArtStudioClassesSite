@@ -3,6 +3,9 @@
 /* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
 
+/* Angular Material Theme - Custom styling is used instead of prebuilt theme */
+/* The button toggle component uses custom styles that override Material defaults */
+
 /* CSS Custom Properties (Design System) */
 :root {
   /* Light Theme Colors */

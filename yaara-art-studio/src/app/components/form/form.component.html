@@ -3,7 +3,7 @@
   <div class="container">
     <div class="form-header">
       <h2 class="section-title fade-in-up">הצטרפו לשיעור ניסיון</h2>
-      <p class="form-subtitle animated-glow fade-in-up">השיעור הראשון רק ב־<span class="price-red">50</span>₪!</p>
+      <p class="form-subtitle animated-glow fade-in-up">השיעור הראשון רק ב־<span class="price-green">50</span>₪!</p>
     </div>
     
     <div class="form-container">
@@ -56,6 +56,21 @@
               >
               <div class="error-message" *ngIf="isFieldInvalid('phone')">
                 מספר טלפון הוא שדה חובה
+              </div>
+            </div>
+            
+            <div class="form-group full-width">
+              <label for="classFor" class="form-label">סוג השיעור *</label>
+              <mat-button-toggle-group 
+                id="classFor"
+                formControlName="classFor"
+                class="class-for-toggle-group"
+                [class.error]="isFieldInvalid('classFor')">
+                <mat-button-toggle value="בשבילי">שיעורי בוגרים</mat-button-toggle>
+                <mat-button-toggle value="בשביל הילד שלי">שיעורי ילדים</mat-button-toggle>
+              </mat-button-toggle-group>
+              <div class="error-message" *ngIf="isFieldInvalid('classFor')">
+                בחירת אופציה היא שדה חובה
               </div>
             </div>
             

@@ -3,6 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { Router } from '@angular/router';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 declare global {
   interface Window {
@@ -13,7 +14,7 @@ declare global {
 @Component({
   selector: 'app-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, MatButtonToggleModule],
   templateUrl: './form.component.html',
   styleUrl: './form.component.scss',
   animations: [
@@ -37,20 +38,39 @@ export class FormComponent {
   availableDates: string[] = [];
   availableTimes: string[] = ['18:00-19:30', '19:30-21:00'];
 
+  // Formspree endpoints
+  private readonly FORMSPREE_URL_ADULT = 'https://formspree.io/f/xovklpvr';
+  private readonly FORMSPREE_URL_CHILDREN = 'https://formspree.io/f/mkogdnnb';
+
   constructor(
     private fb: FormBuilder, 
     private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
-    this.availableDates = this.generateAvailableDates();
-    
     this.registrationForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       phone: ['', [Validators.required, Validators.pattern(/^[0-9\-\+\s\(\)]+$/)]],
       selectedDate: ['', [Validators.required]],
       selectedTime: ['', [Validators.required]],
-      background: ['', [Validators.required, Validators.minLength(2)]]
+      background: ['', [Validators.required, Validators.minLength(2)]],
+      classFor: ['', [Validators.required]] // בשביל מי השיעור
+    });
+    
+    // Initialize with adult class dates/times (default)
+    this.updateDatesAndTimes('בשבילי');
+    
+    // Watch for changes in classFor and update dates/times accordingly
+    this.registrationForm.get('classFor')?.valueChanges.subscribe(value => {
+      console.log('🔵 [Form] classFor value changed:', value);
+      if (value) {
+        this.updateDatesAndTimes(value);
+        // Reset selected date and time when class type changes
+        this.registrationForm.patchValue({
+          selectedDate: '',
+          selectedTime: ''
+        }, { emitEvent: false });
+      }
     });
     
     // Check if Meta Pixel is loaded on component initialization
@@ -65,7 +85,36 @@ export class FormComponent {
     }
   }
 
-  private generateAvailableDates(): string[] {
+  /**
+   * Update available dates and times based on classFor selection
+   */
+  private updateDatesAndTimes(classFor: string): void {
+    if (classFor === 'בשביל הילד שלי') {
+      // Children classes: Monday (1), Tuesday (2), Thursday (4)
+      // Times: 15:00-16:30, 16:30-18:00
+      this.availableDates = this.generateAvailableDates([1, 2, 4]);
+      this.availableTimes = ['15:00-16:30', '16:30-18:00'];
+      console.log('🔵 [Form] Updated to children class schedule:', {
+        dates: this.availableDates.length,
+        times: this.availableTimes
+      });
+    } else {
+      // Adult classes: Sunday (0), Tuesday (2), Wednesday (3)
+      // Times: 18:00-19:30, 19:30-21:00
+      this.availableDates = this.generateAvailableDates([0, 2, 3]);
+      this.availableTimes = ['18:00-19:30', '19:30-21:00'];
+      console.log('🔵 [Form] Updated to adult class schedule:', {
+        dates: this.availableDates.length,
+        times: this.availableTimes
+      });
+    }
+  }
+
+  /**
+   * Generate available dates based on target days of the week
+   * @param targetDays Array of day numbers (0=Sunday, 1=Monday, ..., 6=Saturday)
+   */
+  private generateAvailableDates(targetDays: number[]): string[] {
     const dates: string[] = [];
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -80,9 +129,6 @@ export class FormComponent {
       new Date('2025-12-10')  // 10.12.2025
     ];
     excludedDates.forEach(d => d.setHours(0, 0, 0, 0));
-    
-    // Days we want: Sunday (0), Tuesday (2), Wednesday (3)
-    const targetDays = [0, 2, 3];
     
     // Start from today and go up to two weeks ahead
     const currentDate = new Date(today);
@@ -111,6 +157,7 @@ export class FormComponent {
       currentDate.setDate(currentDate.getDate() + 1);
     }
     
+    console.log('🔵 [Form] Generated dates for target days:', targetDays, 'Total dates:', dates.length);
     return dates;
   }
 
@@ -133,13 +180,15 @@ export class FormComponent {
       const formData = this.registrationForm.value;
       // Combine date and time for lessonDate
       const lessonDate = `${formData.selectedDate} ${formData.selectedTime}`;
-      console.log('Data being sent to Formspree:', {
+      console.log('🔵 [Form] Data being sent to Formspree:', {
         firstName: formData.firstName,
         lastName: formData.lastName,
         phone: formData.phone,
         lessonDate: lessonDate,
-        background: formData.background
+        background: formData.background,
+        classFor: formData.classFor
       });
+      console.log('🔵 [Form] Selected classFor option:', formData.classFor);
       
       // Submit the form using fetch API
       this.submitToFormspree();
@@ -171,13 +220,21 @@ export class FormComponent {
     // Combine date and time for lessonDate
     const lessonDate = `${formData.selectedDate} ${formData.selectedTime}`;
     
-    console.log('Preparing to submit form to Formspree with data:', {
+    // Determine which Formspree endpoint to use based on classFor selection
+    const formspreeUrl = formData.classFor === 'בשביל הילד שלי' 
+      ? this.FORMSPREE_URL_CHILDREN
+      : this.FORMSPREE_URL_ADULT;
+    
+    console.log('🔵 [Form] Preparing to submit form to Formspree with data:', {
       firstName: formData.firstName,
       lastName: formData.lastName,
       phone: formData.phone,
       lessonDate: lessonDate,
-      background: formData.background
+      background: formData.background,
+      classFor: formData.classFor
     });
+    console.log('🔵 [Form] Selected classFor:', formData.classFor);
+    console.log('🔵 [Form] Using Formspree URL:', formspreeUrl);
     
     // Create FormData object for Formspree
     const formDataToSend = new FormData();
@@ -189,11 +246,18 @@ export class FormComponent {
     formDataToSend.append('phone', formData.phone || '');
     formDataToSend.append('lessonDate', lessonDate || '');
     formDataToSend.append('background', formData.background || '');
+    formDataToSend.append('classFor', formData.classFor || '');
     
-    console.log('Sending data to Formspree...');
+    console.log('🔵 [Form] Sending data to Formspree...');
+    // Log FormData contents for debugging
+    const formDataEntries: string[] = [];
+    formDataToSend.forEach((value, key) => {
+      formDataEntries.push(`${key}: ${value}`);
+    });
+    console.log('🔵 [Form] FormData contents:', formDataEntries);
     
     try {
-      const response = await fetch('https://formspree.io/f/xovklpvr', {
+      const response = await fetch(formspreeUrl, {
         method: 'POST',
         body: formDataToSend,
         headers: {
@@ -224,6 +288,7 @@ export class FormComponent {
         localStorage.setItem('formPhone', formData.phone || '');
         localStorage.setItem('formLessonDate', lessonDate || '');
         localStorage.setItem('formBackground', formData.background || '');
+        localStorage.setItem('formClassFor', formData.classFor || '');
         localStorage.setItem('formSubmissionTime', nowIso);
         
         // Navigate to payment page

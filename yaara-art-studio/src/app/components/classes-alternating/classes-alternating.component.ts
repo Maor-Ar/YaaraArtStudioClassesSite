@@ -38,11 +38,18 @@ export class ClassesAlternatingComponent {
       days: 'ימי ראשון',
       times: ['18:00-19:30', '19:30-21:00'],
       imageUrl: 'https://github.com/user-attachments/assets/2b623d39-9c60-4f8f-b36c-00d253f4c89a'
+    },
+    {
+      title: 'שיעורים לילדים',
+      description: 'בשיעורים האלה נשים דגש על עידוד הביטחון העצמי, הקניית כלים וידע, ויצירה עצמאית באמנות. נעבוד בטכניקות של רישום ואקריליק. מיועד לגילאי 6-16.',
+      days: 'שני, שלישי וחמישי',
+      times: ['15:00-16:30', '16:30-18:00'],
+      imageUrl: 'https://github.com/user-attachments/assets/ac703243-78ca-46e1-a996-a62f532898c8'
     }
   ];
 
   isImageLeft(index: number): boolean {
-    return index % 2 === 0; // Even indices (0, 2) = left, odd (1) = right
+    return index % 2 === 0; // Even indices (0, 2) = left, odd (1, 3) = right
   }
 }
 

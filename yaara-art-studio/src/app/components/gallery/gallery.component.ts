@@ -51,11 +51,11 @@ export class GalleryComponent {
       description: "30X40 ס״מ",
       imageUrl: "https://github.com/user-attachments/assets/6d64e201-45eb-40a2-a4ab-5ff37d395d31"
     },
-    {
-      title: "אקריליק על קנבס",
-      description: "80X60 ס״מ",
-      imageUrl: "https://github.com/user-attachments/assets/ac703243-78ca-46e1-a996-a62f532898c8"
-    },
+    //{
+    //  title: "אקריליק על קנבס",
+    //  description: "80X60 ס״מ",
+    //  imageUrl: "https://github.com/user-attachments/assets/ac703243-78ca-46e1-a996-a62f532898c8"
+    //},
     {
       title: "אקריליק על קנבס",
       description: "13X18 ס״מ",
