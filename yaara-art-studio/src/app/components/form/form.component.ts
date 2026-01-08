@@ -92,15 +92,24 @@ export class FormComponent {
     if (classFor === 'בשביל הילד שלי') {
       // Children classes: Monday (1), Tuesday (2), Thursday (4)
       // Times: 15:00-16:30, 16:30-18:00
-      this.availableDates = this.generateAvailableDates([1, 2, 4]);
+      // Start date: max(26.1.2026, today) - children classes open on 26.1.2026
+      const childrenOpeningDate = new Date('2026-01-26');
+      childrenOpeningDate.setHours(0, 0, 0, 0);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const startDate = today > childrenOpeningDate ? today : childrenOpeningDate;
+      
+      this.availableDates = this.generateAvailableDates([1, 2, 4], startDate);
       this.availableTimes = ['15:00-16:30', '16:30-18:00'];
       console.log('🔵 [Form] Updated to children class schedule:', {
         dates: this.availableDates.length,
-        times: this.availableTimes
+        times: this.availableTimes,
+        startDate: startDate.toLocaleDateString('he-IL')
       });
     } else {
       // Adult classes: Sunday (0), Tuesday (2), Wednesday (3)
       // Times: 18:00-19:30, 19:30-21:00
+      // Start from today (current behavior)
       this.availableDates = this.generateAvailableDates([0, 2, 3]);
       this.availableTimes = ['18:00-19:30', '19:30-21:00'];
       console.log('🔵 [Form] Updated to adult class schedule:', {
@@ -113,15 +122,20 @@ export class FormComponent {
   /**
    * Generate available dates based on target days of the week
    * @param targetDays Array of day numbers (0=Sunday, 1=Monday, ..., 6=Saturday)
+   * @param startDate Optional start date. If not provided, uses today's date
    */
-  private generateAvailableDates(targetDays: number[]): string[] {
+  private generateAvailableDates(targetDays: number[], startDate?: Date): string[] {
     const dates: string[] = [];
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    // Calculate two weeks from today
-    const twoWeeksFromNow = new Date(today);
-    twoWeeksFromNow.setDate(today.getDate() + 14);
+    // Use provided startDate or default to today
+    const start = startDate ? new Date(startDate) : new Date(today);
+    start.setHours(0, 0, 0, 0);
+    
+    // Calculate two weeks from start date
+    const twoWeeksFromStart = new Date(start);
+    twoWeeksFromStart.setDate(start.getDate() + 14);
     
     // Dates to exclude
     const excludedDates = [
@@ -130,10 +144,10 @@ export class FormComponent {
     ];
     excludedDates.forEach(d => d.setHours(0, 0, 0, 0));
     
-    // Start from today and go up to two weeks ahead
-    const currentDate = new Date(today);
+    // Start from the calculated start date and go up to two weeks ahead
+    const currentDate = new Date(start);
     
-    while (currentDate <= twoWeeksFromNow) {
+    while (currentDate <= twoWeeksFromStart) {
       const dayOfWeek = currentDate.getDay();
       
       // Check if this is one of our target days
@@ -157,7 +171,7 @@ export class FormComponent {
       currentDate.setDate(currentDate.getDate() + 1);
     }
     
-    console.log('🔵 [Form] Generated dates for target days:', targetDays, 'Total dates:', dates.length);
+    console.log('🔵 [Form] Generated dates for target days:', targetDays, 'Start date:', start.toLocaleDateString('he-IL'), 'Total dates:', dates.length);
     return dates;
   }
 
