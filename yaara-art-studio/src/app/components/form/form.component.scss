@@ -267,6 +267,25 @@
       color: var(--secondary);
       flex-shrink: 0;
     }
+    
+    .contact-phone-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      
+      .contact-phone-tag {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        font-weight: 400;
+        opacity: 0.8;
+      }
+      
+      .contact-phone-number {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--primary);
+      }
+    }
   }
 }
 
