@@ -33,9 +33,14 @@ import { FormComponent } from '../../components/form/form.component';
 export class MainPageComponent {
   showWhatsAppButton = true;
   showAlternatingComponent: boolean;
+  isWhatsAppExpanded = false;
 
   constructor() {
     // Randomly choose which component to show (50/50 chance)
     this.showAlternatingComponent = Math.random() < 0.5;
+  }
+
+  toggleWhatsAppOptions(): void {
+    this.isWhatsAppExpanded = !this.isWhatsAppExpanded;
   }
 }

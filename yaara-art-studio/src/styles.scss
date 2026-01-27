@@ -450,15 +450,23 @@ select {
   }
 }
 
-/* Reduced motion support */
+/* Reduced motion support - Only applies when user explicitly enables reduced motion in OS/browser settings */
+/* This respects accessibility preferences while ensuring animations work by default */
 @media (prefers-reduced-motion: reduce) {
-  * {
+  /* Disable animations and transitions when user prefers reduced motion */
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
   
   html {
-    scroll-behavior: auto;
+    scroll-behavior: auto !important;
   }
 }
+
+/* IMPORTANT: Check your OS/browser settings for "Reduce motion" or "Motion" preferences */
+/* If animations still don't work, your system may have reduced motion enabled */
+/* To test: Temporarily comment out the @media (prefers-reduced-motion: reduce) block above */
