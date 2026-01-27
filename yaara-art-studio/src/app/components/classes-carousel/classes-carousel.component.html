@@ -8,7 +8,7 @@
     <div class="carousel-wrapper">
       <div class="carousel-container">
         <div class="carousel-track" [style.transform]="'translateX(-' + (currentIndex * 100) + '%)'">
-          <div class="carousel-slide" *ngFor="let artClass of classes; let i = index">
+          <div class="carousel-slide" *ngFor="let artClass of filteredClasses; let i = index">
             <div class="slide-content">
               <div class="slide-image">
                 <img [src]="artClass.imageUrl" [alt]="artClass.title" class="slide-img">
@@ -50,7 +50,7 @@
       <!-- Indicators -->
       <div class="carousel-indicators">
         <button 
-          *ngFor="let artClass of classes; let i = index"
+          *ngFor="let artClass of filteredClasses; let i = index"
           class="indicator"
           [class.active]="i === currentIndex"
           (click)="goToSlide(i)"

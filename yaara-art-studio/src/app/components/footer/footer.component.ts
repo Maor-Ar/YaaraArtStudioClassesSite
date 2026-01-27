@@ -1,20 +1,25 @@
-import { Component, Inject, PLATFORM_ID } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, Inject, PLATFORM_ID, Input } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { PopupComponent } from '../popup/popup.component';
-import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [PopupComponent, RouterLink],
+  imports: [CommonModule, PopupComponent, RouterLink],
   templateUrl: './footer.component.html',
   styleUrl: './footer.component.scss'
 })
 export class FooterComponent {
+  @Input() viewMode: 'adult' | 'child' | 'both' = 'both';
   showPrivacyPopup = false;
   showTermsPopup = false;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   privacyPolicyContent = `
     <h1>מדיניות פרטיות</h1>
@@ -88,16 +93,56 @@ export class FooterComponent {
     <p><strong>9.2</strong> כל מחלוקת הנוגעת לשימוש באתר תועבר להכרעה בלעדית לבית המשפט המוסמך בתל אביב.</p>
   `;
 
-  scrollToSection(sectionId: string): void {
+  scrollToSection(sectionId: string, event?: Event): void {
+    if (event) {
+      event.preventDefault();
+    }
+    
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
     
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
+    // Check if we're on the main page or need to navigate there first
+    const currentRoute = this.router.url.split('?')[0];
+    const isMainPage = currentRoute === '/' || currentRoute === '';
+    
+    // Preserve query parameters
+    const queryParams = this.route.snapshot.queryParams;
+    
+    if (!isMainPage) {
+      // Navigate to main page with fragment and query params
+      this.router.navigate(['/'], {
+        fragment: sectionId,
+        queryParams: queryParams,
+        queryParamsHandling: 'merge'
+      }).then(() => {
+        setTimeout(() => {
+          const element = document.getElementById(sectionId);
+          if (element) {
+            element.scrollIntoView({ 
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        }, 100);
+      });
+    } else {
+      // Navigate with fragment and query params preserved
+      this.router.navigate([], {
+        fragment: sectionId,
+        queryParams: queryParams,
+        queryParamsHandling: 'merge'
+      }).then(() => {
+        // Scroll to section after navigation
+        setTimeout(() => {
+          const element = document.getElementById(sectionId);
+          if (element) {
+            element.scrollIntoView({ 
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        }, 100);
       });
     }
   }
@@ -116,5 +161,18 @@ export class FooterComponent {
 
   closeTermsPopup(): void {
     this.showTermsPopup = false;
+  }
+
+  navigateToPayments(event?: Event): void {
+    if (event) {
+      event.preventDefault();
+    }
+    
+    // Preserve query parameters when navigating to payments
+    const queryParams = this.route.snapshot.queryParams;
+    this.router.navigate(['/payments'], {
+      queryParams: queryParams,
+      queryParamsHandling: 'merge'
+    });
   }
 }

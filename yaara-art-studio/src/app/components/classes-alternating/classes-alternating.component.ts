@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input, OnInit, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 interface ArtClass {
@@ -16,7 +16,9 @@ interface ArtClass {
   templateUrl: './classes-alternating.component.html',
   styleUrl: './classes-alternating.component.scss'
 })
-export class ClassesAlternatingComponent {
+export class ClassesAlternatingComponent implements OnInit, OnChanges {
+  @Input() viewMode: 'adult' | 'child' | 'both' = 'both';
+  
   classes: ArtClass[] = [
     {
       title: 'תרגיל מתחלף - שיעור הדגל',
@@ -47,6 +49,26 @@ export class ClassesAlternatingComponent {
       imageUrl: 'https://github.com/user-attachments/assets/ac703243-78ca-46e1-a996-a62f532898c8'
     }
   ];
+
+  filteredClasses: ArtClass[] = [];
+
+  ngOnInit(): void {
+    this.updateFilteredClasses();
+  }
+
+  ngOnChanges(): void {
+    this.updateFilteredClasses();
+  }
+
+  private updateFilteredClasses(): void {
+    if (this.viewMode === 'adult') {
+      this.filteredClasses = this.classes.filter(c => c.title !== 'שיעורים לילדים');
+    } else if (this.viewMode === 'child') {
+      this.filteredClasses = this.classes.filter(c => c.title === 'שיעורים לילדים');
+    } else {
+      this.filteredClasses = this.classes; // both
+    }
+  }
 
   isImageLeft(index: number): boolean {
     return index % 2 === 0; // Even indices (0, 2) = left, odd (1, 3) = right

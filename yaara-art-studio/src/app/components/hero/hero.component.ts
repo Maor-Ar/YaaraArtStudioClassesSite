@@ -1,4 +1,6 @@
-import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Router, ActivatedRoute } from '@angular/router';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { ThemeService } from '../../services/theme.service';
 
@@ -28,7 +30,12 @@ export class HeroComponent implements OnInit, AfterViewInit {
   @ViewChild('heroVideo', { static: false }) heroVideo!: ElementRef<HTMLVideoElement>;
   showStaticBg = false;
 
-  constructor(public themeService: ThemeService) {}
+  constructor(
+    public themeService: ThemeService,
+    private router: Router,
+    private route: ActivatedRoute,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
   ngOnInit(): void {
   }
@@ -97,16 +104,57 @@ export class HeroComponent implements OnInit, AfterViewInit {
     }
   }
 
-  scrollToSection(sectionId: string): void {
-    if (typeof window === 'undefined') {
+  scrollToSection(sectionId: string, event?: Event): void {
+    if (event) {
+      event.preventDefault();
+    }
+    
+    if (!isPlatformBrowser(this.platformId)) {
       return;
     }
     
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
+    // Check if we're on the main page or need to navigate there first
+    const currentRoute = this.router.url.split('?')[0];
+    const isMainPage = currentRoute === '/' || currentRoute === '';
+    
+    if (!isMainPage) {
+      // Navigate to main page with fragment and query params
+      const queryParams = this.route.snapshot.queryParams;
+      this.router.navigate(['/'], {
+        fragment: sectionId,
+        queryParams: queryParams,
+        queryParamsHandling: 'merge'
+      }).then(() => {
+        setTimeout(() => {
+          const element = document.getElementById(sectionId);
+          if (element) {
+            element.scrollIntoView({ 
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        }, 100);
+      });
+    } else {
+      // Preserve query parameters
+      const queryParams = this.route.snapshot.queryParams;
+      
+      // Navigate with fragment and query params preserved
+      this.router.navigate([], {
+        fragment: sectionId,
+        queryParams: queryParams,
+        queryParamsHandling: 'merge'
+      }).then(() => {
+        // Scroll to section after navigation
+        setTimeout(() => {
+          const element = document.getElementById(sectionId);
+          if (element) {
+            element.scrollIntoView({ 
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        }, 100);
       });
     }
   }

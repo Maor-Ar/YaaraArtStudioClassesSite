@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, ViewChild, ElementRef, Inject, PLATFORM_ID, Input, OnInit, OnChanges } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
@@ -29,8 +29,9 @@ declare global {
     ])
   ]
 })
-export class FormComponent {
+export class FormComponent implements OnInit, OnChanges {
   @ViewChild('formElement') formElement!: ElementRef<HTMLFormElement>;
+  @Input() viewMode: 'adult' | 'child' | 'both' = 'both';
   
   registrationForm: FormGroup;
   isSubmitting = false;
@@ -57,13 +58,10 @@ export class FormComponent {
       classFor: ['', [Validators.required]] // בשביל מי השיעור
     });
     
-    // Initialize with adult class dates/times (default)
-    this.updateDatesAndTimes('בשבילי');
-    
-    // Watch for changes in classFor and update dates/times accordingly
+    // Watch for changes in classFor and update dates/times accordingly (only when viewMode is 'both')
     this.registrationForm.get('classFor')?.valueChanges.subscribe(value => {
-      console.log('🔵 [Form] classFor value changed:', value);
-      if (value) {
+      if (this.viewMode === 'both' && value) {
+        console.log('🔵 [Form] classFor value changed:', value);
         this.updateDatesAndTimes(value);
         // Reset selected date and time when class type changes
         this.registrationForm.patchValue({
@@ -82,6 +80,33 @@ export class FormComponent {
           console.warn('⚠️ [Meta Pixel] fbq is NOT available on form component init');
         }
       }, 500);
+    }
+  }
+
+  ngOnInit(): void {
+    this.applyViewMode();
+  }
+
+  ngOnChanges(): void {
+    this.applyViewMode();
+  }
+
+  private applyViewMode(): void {
+    if (this.viewMode === 'adult') {
+      this.registrationForm.patchValue({ classFor: 'בשבילי' });
+      this.registrationForm.get('classFor')?.disable();
+      this.updateDatesAndTimes('בשבילי');
+    } else if (this.viewMode === 'child') {
+      this.registrationForm.patchValue({ classFor: 'בשביל הילד שלי' });
+      this.registrationForm.get('classFor')?.disable();
+      this.updateDatesAndTimes('בשביל הילד שלי');
+    } else {
+      // both - enable toggle and initialize with adult
+      this.registrationForm.get('classFor')?.enable();
+      if (!this.registrationForm.get('classFor')?.value) {
+        this.registrationForm.patchValue({ classFor: 'בשבילי' });
+        this.updateDatesAndTimes('בשבילי');
+      }
     }
   }
 
@@ -190,8 +215,8 @@ export class FormComponent {
       this.isSubmitting = true;
       console.log('Form is valid, submitting...');
       
-      // Log form data that will be sent to Formspree
-      const formData = this.registrationForm.value;
+      // Use getRawValue() to include disabled controls (needed when viewMode is set)
+      const formData = this.registrationForm.getRawValue();
       // Combine date and time for lessonDate
       const lessonDate = `${formData.selectedDate} ${formData.selectedTime}`;
       console.log('🔵 [Form] Data being sent to Formspree:', {

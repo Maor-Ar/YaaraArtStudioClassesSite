@@ -7,7 +7,7 @@
     
     <div class="classes-list">
       <div class="class-item fade-in-up" 
-           *ngFor="let artClass of classes; let i = index">
+           *ngFor="let artClass of filteredClasses; let i = index">
         <div class="class-background-image">
           <img [src]="artClass.imageUrl" [alt]="artClass.title" class="bg-img">
           <div class="image-overlay"></div>
