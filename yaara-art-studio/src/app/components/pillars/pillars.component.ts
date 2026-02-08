@@ -1,4 +1,4 @@
-import { Component, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, Inject, Input, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 
@@ -10,6 +10,8 @@ import { Router, ActivatedRoute } from '@angular/router';
   styleUrl: './pillars.component.scss'
 })
 export class PillarsComponent {
+  @Input() viewMode: 'adult' | 'child' | 'both' = 'both';
+
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private router: Router,

@@ -6,7 +6,7 @@
   <app-about></app-about>
   <app-classes-alternating *ngIf="showAlternatingComponent" [viewMode]="viewMode"></app-classes-alternating>
   <app-classes-background *ngIf="!showAlternatingComponent" [viewMode]="viewMode"></app-classes-background>
-  <app-pillars></app-pillars>
+  <app-pillars [viewMode]="viewMode"></app-pillars>
   <app-gallery></app-gallery>
   <app-testimonials [hidden]="true"></app-testimonials>
   <app-form [viewMode]="viewMode"></app-form>
