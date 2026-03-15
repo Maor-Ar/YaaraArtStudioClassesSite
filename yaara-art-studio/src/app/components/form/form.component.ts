@@ -116,7 +116,7 @@ export class FormComponent implements OnInit, OnChanges {
   private updateDatesAndTimes(classFor: string): void {
     if (classFor === 'בשביל הילד שלי') {
       // Children classes: Monday (1), Tuesday (2), Thursday (4)
-      // Times: 15:00-16:30, 16:30-18:00
+      // Times: 15:30-16:45, 16:45-18:00
       // Start date: max(26.1.2026, today) - children classes open on 26.1.2026
       const childrenOpeningDate = new Date('2026-01-26');
       childrenOpeningDate.setHours(0, 0, 0, 0);
@@ -125,7 +125,7 @@ export class FormComponent implements OnInit, OnChanges {
       const startDate = today > childrenOpeningDate ? today : childrenOpeningDate;
       
       this.availableDates = this.generateAvailableDates([1, 2, 4], startDate);
-      this.availableTimes = ['15:00-16:30', '16:30-18:00'];
+      this.availableTimes = ['15:30-16:45', '16:45-18:00'];
       console.log('🔵 [Form] Updated to children class schedule:', {
         dates: this.availableDates.length,
         times: this.availableTimes,
