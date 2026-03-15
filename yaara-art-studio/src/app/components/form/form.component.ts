@@ -330,10 +330,17 @@ export class FormComponent implements OnInit, OnChanges {
         localStorage.setItem('formClassFor', formData.classFor || '');
         localStorage.setItem('formSubmissionTime', nowIso);
         
-        // Navigate to payment page
+        // Redirect based on "סוג השיעור" (classFor): children → Smartbee; adults → existing payment page
+        const classFor = this.registrationForm.getRawValue().classFor || '';
         this.isSubmitting = false;
         this.registrationForm.reset();
-        this.router.navigate(['/payments']);
+        if (classFor === 'בשביל הילד שלי') {
+          // שיעורי ילדים ונוער → Smartbee payment page
+          window.location.href = 'https://smartbee.co.il/public-pages/?redirect-path=pay/69a2ef381b25b0a8f0d555ed';
+        } else {
+          // שיעורי בוגרים → existing payment flow
+          this.router.navigate(['/payments']);
+        }
       } else {
         console.error('Form submission failed:', response.status, response.statusText);
         const error = await response.text();
