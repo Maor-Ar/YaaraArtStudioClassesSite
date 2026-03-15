@@ -132,7 +132,7 @@
 .mobile-nav {
   position: fixed;
   top: 0;
-  right: -100%;
+  right: 0;
   width: 280px;
   height: 100vh;
   background: var(--white);
@@ -140,9 +140,10 @@
   transition: var(--transition-normal);
   z-index: 1001;
   overflow-y: auto;
+  transform: translateX(100%);
   
   &.open {
-    right: 0;
+    transform: translateX(0);
   }
   
   .mobile-nav-content {
