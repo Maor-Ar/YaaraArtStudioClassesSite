@@ -116,7 +116,7 @@ export class FormComponent implements OnInit, OnChanges {
   private updateDatesAndTimes(classFor: string): void {
     if (classFor === 'בשביל הילד שלי') {
       // Children classes: Monday (1), Tuesday (2), Thursday (4)
-      // Times: 15:00-16:30, 16:30-18:00
+      // Times: 15:30-16:45, 16:45-18:00
       // Start date: max(26.1.2026, today) - children classes open on 26.1.2026
       const childrenOpeningDate = new Date('2026-01-26');
       childrenOpeningDate.setHours(0, 0, 0, 0);
@@ -125,7 +125,7 @@ export class FormComponent implements OnInit, OnChanges {
       const startDate = today > childrenOpeningDate ? today : childrenOpeningDate;
       
       this.availableDates = this.generateAvailableDates([1, 2, 4], startDate);
-      this.availableTimes = ['15:00-16:30', '16:30-18:00'];
+      this.availableTimes = ['15:30-16:45', '16:45-18:00'];
       console.log('🔵 [Form] Updated to children class schedule:', {
         dates: this.availableDates.length,
         times: this.availableTimes,
@@ -330,10 +330,17 @@ export class FormComponent implements OnInit, OnChanges {
         localStorage.setItem('formClassFor', formData.classFor || '');
         localStorage.setItem('formSubmissionTime', nowIso);
         
-        // Navigate to payment page
+        // Redirect based on "סוג השיעור" (classFor): children → Smartbee; adults → existing payment page
+        const classFor = this.registrationForm.getRawValue().classFor || '';
         this.isSubmitting = false;
         this.registrationForm.reset();
-        this.router.navigate(['/payments']);
+        if (classFor === 'בשביל הילד שלי') {
+          // שיעורי ילדים ונוער → Smartbee payment page
+          window.location.href = 'https://smartbee.co.il/public-pages/?redirect-path=pay/69a2ef381b25b0a8f0d555ed';
+        } else {
+          // שיעורי בוגרים → existing payment flow
+          this.router.navigate(['/payments']);
+        }
       } else {
         console.error('Form submission failed:', response.status, response.statusText);
         const error = await response.text();
