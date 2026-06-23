@@ -1,4 +1,4 @@
-import { Component, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, Inject, PLATFORM_ID, OnInit } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 interface Artwork {
@@ -14,7 +14,7 @@ interface Artwork {
   templateUrl: './gallery.component.html',
   styleUrl: './gallery.component.scss'
 })
-export class GalleryComponent {
+export class GalleryComponent implements OnInit {
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
   isLightboxOpen = false;
   currentArtworkIndex = 0;
@@ -97,6 +97,59 @@ export class GalleryComponent {
       imageUrl: "https://github.com/user-attachments/assets/8b571af9-0491-4d66-a0c1-26902fa3f691"
     }
   ];
+
+  // Added images from src/assets/new_images
+  // These files were copied into the project assets directory and referenced here
+  private newImageBase = 'assets/new_images/';
+
+  ngOnInit(): void {
+    // Append images from the new_images folder to the artworks list
+    const newFiles = [
+      'WhatsApp Image 2026-06-23 at 15.11.04.jpeg',
+      'WhatsApp Image 2026-06-23 at 15.11.05 (1).jpeg',
+      'WhatsApp Image 2026-06-23 at 15.11.05 (2).jpeg',
+      'WhatsApp Image 2026-06-23 at 15.11.05.jpeg',
+      'WhatsApp Image 2026-06-23 at 15.11.06 (1).jpeg',
+      'WhatsApp Image 2026-06-23 at 15.11.06 (2).jpeg',
+      'WhatsApp Image 2026-06-23 at 15.11.06.jpeg',
+      'WhatsApp Image 2026-06-23 at 15.11.07 (1).jpeg',
+      'WhatsApp Image 2026-06-23 at 15.11.07 (2).jpeg',
+      'WhatsApp Image 2026-06-23 at 15.11.07 (3).jpeg',
+      'WhatsApp Image 2026-06-23 at 15.11.07.jpeg',
+      'WhatsApp Image 2026-06-23 at 15.11.08 (1).jpeg',
+      'WhatsApp Image 2026-06-23 at 15.11.08 (2).jpeg',
+      'WhatsApp Image 2026-06-23 at 15.11.08.jpeg',
+      'WhatsApp Image 2026-06-23 at 15.11.09.jpeg'
+    ];
+
+    for (const f of newFiles) {
+      // Use encodeURI to handle spaces and parentheses in filenames
+      const url = encodeURI(this.newImageBase + f);
+      this.artworks.push({ title: '', description: '', imageUrl: url });
+    }
+    // Shuffle artworks so the gallery order is randomized on each load
+      // Shuffle once using a fixed seed so the order is deterministic (constant)
+      this.shuffleArtworks();
+  }
+
+    private shuffleArtworks(): void {
+      // Deterministic PRNG (xorshift32-like) with fixed seed
+      let seed = 123456789;
+      const rand = () => {
+        seed ^= seed << 13;
+        seed ^= seed >>> 17;
+        seed ^= seed << 5;
+        // normalize to [0,1)
+        return (seed >>> 0) / 4294967296;
+      };
+
+      for (let i = this.artworks.length - 1; i > 0; i--) {
+        const j = Math.floor(rand() * (i + 1));
+        const tmp = this.artworks[i];
+        this.artworks[i] = this.artworks[j];
+        this.artworks[j] = tmp;
+      }
+    }
 
   get currentArtwork(): Artwork | undefined {
     return this.artworks[this.currentArtworkIndex];
