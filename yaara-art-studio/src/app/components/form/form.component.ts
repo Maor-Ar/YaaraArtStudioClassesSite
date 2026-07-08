@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { trigger, transition, style, animate } from '@angular/animations';
 import { Router } from '@angular/router';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { AdultClassOccurrence, ArthubEventsService } from '../../services/arthub-events.service';
 
 declare global {
   interface Window {
@@ -38,6 +39,10 @@ export class FormComponent implements OnInit, OnChanges {
   showSuccessMessage = false;
   availableDates: string[] = [];
   availableTimes: string[] = ['18:00-19:30', '19:30-21:00'];
+  availableAdultOccurrences: AdultClassOccurrence[] = [];
+  isLoadingAdultClasses = false;
+  adultClassesError: string | null = null;
+  isAdultSchedule = true;
 
   // Formspree endpoints
   private readonly FORMSPREE_URL_ADULT = 'https://formspree.io/f/xovklpvr';
@@ -46,14 +51,16 @@ export class FormComponent implements OnInit, OnChanges {
   constructor(
     private fb: FormBuilder, 
     private router: Router,
+    private arthubEvents: ArthubEventsService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.registrationForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       phone: ['', [Validators.required, Validators.pattern(/^[0-9\-\+\s\(\)]+$/)]],
-      selectedDate: ['', [Validators.required]],
-      selectedTime: ['', [Validators.required]],
+      selectedDate: [''],
+      selectedTime: [''],
+      selectedOccurrenceId: [''],
       background: ['', [Validators.required, Validators.minLength(2)]],
       classFor: ['', [Validators.required]] // בשביל מי השיעור
     });
@@ -66,7 +73,8 @@ export class FormComponent implements OnInit, OnChanges {
         // Reset selected date and time when class type changes
         this.registrationForm.patchValue({
           selectedDate: '',
-          selectedTime: ''
+          selectedTime: '',
+          selectedOccurrenceId: ''
         }, { emitEvent: false });
       }
     });
@@ -115,6 +123,12 @@ export class FormComponent implements OnInit, OnChanges {
    */
   private updateDatesAndTimes(classFor: string): void {
     if (classFor === 'בשביל הילד שלי') {
+      this.isAdultSchedule = false;
+      this.availableAdultOccurrences = [];
+      this.adultClassesError = null;
+      this.isLoadingAdultClasses = false;
+      this.setChildrenScheduleValidators();
+
       // Children classes: Monday (1), Tuesday (2), Thursday (4)
       // Times: 15:30-16:45, 16:45-18:00
       // Start date: max(26.1.2026, today) - children classes open on 26.1.2026
@@ -132,16 +146,61 @@ export class FormComponent implements OnInit, OnChanges {
         startDate: startDate.toLocaleDateString('he-IL')
       });
     } else {
-      // Adult classes: Sunday (0), Tuesday (2), Wednesday (3)
-      // Times: 18:00-19:30, 19:30-21:00
-      // Start from today (current behavior)
-      this.availableDates = this.generateAvailableDates([0, 2, 3]);
-      this.availableTimes = ['18:00-19:30', '19:30-21:00'];
-      console.log('🔵 [Form] Updated to adult class schedule:', {
-        dates: this.availableDates.length,
-        times: this.availableTimes
-      });
+      this.isAdultSchedule = true;
+      this.setAdultScheduleValidators();
+      this.loadAdultOccurrences();
     }
+  }
+
+  private setAdultScheduleValidators(): void {
+    this.registrationForm.get('selectedOccurrenceId')?.setValidators([Validators.required]);
+    this.registrationForm.get('selectedDate')?.clearValidators();
+    this.registrationForm.get('selectedTime')?.clearValidators();
+    this.registrationForm.get('selectedOccurrenceId')?.updateValueAndValidity({ emitEvent: false });
+    this.registrationForm.get('selectedDate')?.updateValueAndValidity({ emitEvent: false });
+    this.registrationForm.get('selectedTime')?.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private setChildrenScheduleValidators(): void {
+    this.registrationForm.get('selectedDate')?.setValidators([Validators.required]);
+    this.registrationForm.get('selectedTime')?.setValidators([Validators.required]);
+    this.registrationForm.get('selectedOccurrenceId')?.clearValidators();
+    this.registrationForm.get('selectedDate')?.updateValueAndValidity({ emitEvent: false });
+    this.registrationForm.get('selectedTime')?.updateValueAndValidity({ emitEvent: false });
+    this.registrationForm.get('selectedOccurrenceId')?.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private async loadAdultOccurrences(): Promise<void> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    this.isLoadingAdultClasses = true;
+    this.adultClassesError = null;
+    this.availableAdultOccurrences = [];
+    this.registrationForm.get('selectedOccurrenceId')?.disable({ emitEvent: false });
+
+    try {
+      const occurrences = await this.arthubEvents.getAvailableAdultOccurrences(14);
+      this.availableAdultOccurrences = occurrences;
+      console.log('🔵 [Form] Loaded adult Firebase occurrences:', occurrences.length);
+
+      if (occurrences.length === 0) {
+        this.adultClassesError = 'אין שיעורים פנויים בשבועיים הקרובים';
+      } else {
+        this.registrationForm.get('selectedOccurrenceId')?.enable({ emitEvent: false });
+      }
+    } catch (error) {
+      console.error('❌ [Form] Failed loading adult classes from Firebase:', error);
+      this.adultClassesError = 'לא ניתן לטעון שיעורים כרגע. נסו לרענן את הדף.';
+    } finally {
+      this.isLoadingAdultClasses = false;
+    }
+  }
+
+  getSelectedAdultOccurrence(): AdultClassOccurrence | undefined {
+    const occurrenceId = this.registrationForm.getRawValue().selectedOccurrenceId;
+    return this.availableAdultOccurrences.find((o) => o.occurrenceId === occurrenceId);
   }
 
   /**
@@ -210,6 +269,11 @@ export class FormComponent implements OnInit, OnChanges {
     console.log('Form valid:', this.registrationForm.valid);
     console.log('Form value:', this.registrationForm.value);
     console.log('Form errors:', this.registrationForm.errors);
+
+    if (this.isAdultSchedule && this.availableAdultOccurrences.length === 0) {
+      this.adultClassesError = this.adultClassesError || 'אין שיעורים פנויים בשבועיים הקרובים';
+      return;
+    }
     
     if (this.registrationForm.valid) {
       this.isSubmitting = true;
@@ -217,8 +281,7 @@ export class FormComponent implements OnInit, OnChanges {
       
       // Use getRawValue() to include disabled controls (needed when viewMode is set)
       const formData = this.registrationForm.getRawValue();
-      // Combine date and time for lessonDate
-      const lessonDate = `${formData.selectedDate} ${formData.selectedTime}`;
+      const lessonDate = this.buildLessonDate(formData);
       console.log('🔵 [Form] Data being sent to Formspree:', {
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -242,6 +305,20 @@ export class FormComponent implements OnInit, OnChanges {
     }
   }
 
+  private buildLessonDate(formData: any): string {
+    if (formData.classFor === 'בשביל הילד שלי') {
+      return `${formData.selectedDate} ${formData.selectedTime}`;
+    }
+
+    const occurrence = this.getSelectedAdultOccurrence();
+    if (!occurrence) {
+      return '';
+    }
+
+    const hebrewDate = occurrence.displayLabel.split(' · ')[0];
+    return `${hebrewDate} ${occurrence.timeLabel}`;
+  }
+
   private getFormErrors(): any {
     const errors: any = {};
     Object.keys(this.registrationForm.controls).forEach(key => {
@@ -254,10 +331,12 @@ export class FormComponent implements OnInit, OnChanges {
   }
 
   private async submitToFormspree(): Promise<void> {
-    const formData = this.registrationForm.value;
-    
-    // Combine date and time for lessonDate
-    const lessonDate = `${formData.selectedDate} ${formData.selectedTime}`;
+    // Use getRawValue() to include disabled controls (needed when viewMode is set)
+    const formData = this.registrationForm.getRawValue();
+    const lessonDate = this.buildLessonDate(formData);
+    const adultOccurrence = formData.classFor === 'בשביל הילד שלי'
+      ? undefined
+      : this.getSelectedAdultOccurrence();
     
     // Determine which Formspree endpoint to use based on classFor selection
     const formspreeUrl = formData.classFor === 'בשביל הילד שלי' 
@@ -270,7 +349,8 @@ export class FormComponent implements OnInit, OnChanges {
       phone: formData.phone,
       lessonDate: lessonDate,
       background: formData.background,
-      classFor: formData.classFor
+      classFor: formData.classFor,
+      classTitle: adultOccurrence?.title
     });
     console.log('🔵 [Form] Selected classFor:', formData.classFor);
     console.log('🔵 [Form] Using Formspree URL:', formspreeUrl);
@@ -286,6 +366,11 @@ export class FormComponent implements OnInit, OnChanges {
     formDataToSend.append('lessonDate', lessonDate || '');
     formDataToSend.append('background', formData.background || '');
     formDataToSend.append('classFor', formData.classFor || '');
+    if (adultOccurrence) {
+      formDataToSend.append('classTitle', adultOccurrence.title || '');
+      formDataToSend.append('eventId', adultOccurrence.baseEventId || '');
+      formDataToSend.append('occurrenceDate', adultOccurrence.occurrenceDateKey || '');
+    }
     
     console.log('🔵 [Form] Sending data to Formspree...');
     // Log FormData contents for debugging
@@ -317,7 +402,6 @@ export class FormComponent implements OnInit, OnChanges {
         this.trackMetaPixelLead();
         
         // Save form data to localStorage before navigating to payment
-        const formData = this.registrationForm.value;
         const fullName = `${formData.firstName} ${formData.lastName}`.trim();
         const nowIso = new Date().toISOString();
         
@@ -329,9 +413,23 @@ export class FormComponent implements OnInit, OnChanges {
         localStorage.setItem('formBackground', formData.background || '');
         localStorage.setItem('formClassFor', formData.classFor || '');
         localStorage.setItem('formSubmissionTime', nowIso);
+
+        if (adultOccurrence) {
+          localStorage.setItem('formEventId', adultOccurrence.baseEventId);
+          localStorage.setItem('formOccurrenceDate', adultOccurrence.occurrenceDateKey);
+          localStorage.setItem('formClassTitle', adultOccurrence.title);
+          localStorage.removeItem('formSpotReserved');
+          localStorage.removeItem('formSpotReservationId');
+        } else {
+          localStorage.removeItem('formEventId');
+          localStorage.removeItem('formOccurrenceDate');
+          localStorage.removeItem('formClassTitle');
+          localStorage.removeItem('formSpotReserved');
+          localStorage.removeItem('formSpotReservationId');
+        }
         
         // Redirect based on "סוג השיעור" (classFor): children → Smartbee; adults → existing payment page
-        const classFor = this.registrationForm.getRawValue().classFor || '';
+        const classFor = formData.classFor || '';
         this.isSubmitting = false;
         this.registrationForm.reset();
         if (classFor === 'בשביל הילד שלי') {

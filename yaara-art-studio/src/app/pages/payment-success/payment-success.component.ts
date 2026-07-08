@@ -3,6 +3,7 @@ import { CommonModule, isPlatformBrowser, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { HeaderComponent } from '../../components/header/header.component';
 import { FooterComponent } from '../../components/footer/footer.component';
+import { ArthubEventsService } from '../../services/arthub-events.service';
 
 declare global {
   interface Window {
@@ -30,10 +31,16 @@ export class PaymentSuccessComponent implements OnInit {
   phone: string | null = null;
   lessonDate: string | null = null;
   background: string | null = null;
+  classTitle: string | null = null;
   fullName: string = '';
+
+  spotReserved = false;
+  spotReserveError: string | null = null;
+  isReservingSpot = false;
 
   constructor(
     private router: Router,
+    private arthubEvents: ArthubEventsService,
     @Inject(PLATFORM_ID) private platformId: Object,
     private renderer: Renderer2
   ) {}
@@ -43,6 +50,7 @@ export class PaymentSuccessComponent implements OnInit {
       window.scrollTo(0, 0);
       this.loadPaymentData();
       this.loadFormData();
+      void this.reserveAdultSpotIfNeeded();
       
       // Check if Meta Pixel is loaded before tracking
       console.log('🟢 [Meta Pixel] Payment success component initialized');
@@ -95,12 +103,64 @@ export class PaymentSuccessComponent implements OnInit {
     this.phone = localStorage.getItem('formPhone');
     this.lessonDate = localStorage.getItem('formLessonDate');
     this.background = localStorage.getItem('formBackground');
+    this.classTitle = localStorage.getItem('formClassTitle');
     
     // Build full name
     if (this.firstName || this.lastName) {
       this.fullName = `${this.firstName || ''} ${this.lastName || ''}`.trim();
     } else {
       this.fullName = this.customerName || '';
+    }
+  }
+
+  /**
+   * Adults only: reserve a manual spot after successful payment (once per submission).
+   */
+  private async reserveAdultSpotIfNeeded(): Promise<void> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    const classFor = localStorage.getItem('formClassFor') || '';
+    if (classFor === 'בשביל הילד שלי') {
+      return;
+    }
+
+    const eventId = localStorage.getItem('formEventId');
+    const occurrenceDateKey = localStorage.getItem('formOccurrenceDate');
+    if (!eventId || !occurrenceDateKey) {
+      return;
+    }
+
+    if (localStorage.getItem('formSpotReserved') === 'true') {
+      this.spotReserved = true;
+      return;
+    }
+
+    this.isReservingSpot = true;
+    this.spotReserveError = null;
+
+    try {
+      const customerName = this.arthubEvents.buildTrialCustomerName(
+        this.firstName || '',
+        this.lastName || ''
+      );
+      const reservationId = await this.arthubEvents.reserveTrialSpot({
+        eventId,
+        occurrenceDateKey,
+        customerName,
+      });
+
+      localStorage.setItem('formSpotReserved', 'true');
+      localStorage.setItem('formSpotReservationId', reservationId);
+      this.spotReserved = true;
+      console.log('✅ [Reserve] Trial spot reserved:', reservationId);
+    } catch (error) {
+      console.error('❌ [Reserve] Failed to reserve trial spot:', error);
+      this.spotReserveError =
+        'התשלום התקבל, אך שריון המקום נכשל. ניצור קשר לתיאום השיעור.';
+    } finally {
+      this.isReservingSpot = false;
     }
   }
 
