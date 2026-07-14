@@ -1,13 +1,12 @@
-import { Component, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Router, ActivatedRoute } from '@angular/router';
 
-interface Testimonial {
-  text: string;
-  name: string;
-  details: string;
-  rating: number;
-  avatarColor: string;
+export interface WhatsAppTestimonial {
+  id: string;
+  src: string;
+  alt: string;
+  /** width / height */
+  ratio: number;
 }
 
 @Component({
@@ -15,117 +14,176 @@ interface Testimonial {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './testimonials.component.html',
-  styleUrl: './testimonials.component.scss'
+  styleUrl: './testimonials.component.scss',
 })
-export class TestimonialsComponent {
-  constructor(
-    @Inject(PLATFORM_ID) private platformId: Object,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
-  testimonials: Testimonial[] = [
+export class TestimonialsComponent implements OnInit, OnDestroy {
+  private readonly autoplayMs = 4500;
+  private autoplayTimer: ReturnType<typeof setInterval> | null = null;
+  private resumeTimer: ReturnType<typeof setTimeout> | null = null;
+
+  activeIndex = 0;
+  spotlightLeaving = false;
+  lightboxSrc: string | null = null;
+
+  readonly testimonials: WhatsAppTestimonial[] = [
     {
-      text: "הרגשתי שגיליתי מחדש את היצירה שלי. יערה ליוותה אותי בכל שלב עם סבלנות רבה ונתנה לי כלים מקצועיים להתפתח.",
-      name: "נועה",
-      details: "תלמידה במשך שנה וחצי",
-      rating: 5,
-      avatarColor: "linear-gradient(135deg, #FF6B6B, #4ECDC4)"
+      id: 't1',
+      src: this.asset('WhatsApp Image 2026-07-14 at 16.20.47.jpeg'),
+      alt: 'המלצה מוואטסאפ',
+      ratio: 3.02,
     },
     {
-      text: "האווירה קסומה, והלימוד בגובה העיניים. אף פעם לא הרגשתי שאני לא מספיק טובה, תמיד עודדו אותי לנסות דברים חדשים.",
-      name: "תומר",
-      details: "תלמיד במשך 8 חודשים",
-      rating: 5,
-      avatarColor: "linear-gradient(135deg, #96CEB4, #FECA57)"
+      id: 't2',
+      src: this.asset('WhatsApp Image 2026-07-14 at 16.20.47 (1).jpeg'),
+      alt: 'המלצה מוואטסאפ',
+      ratio: 2.19,
     },
     {
-      text: "הסטודיו הפך לבית שני שלי. כל שיעור הוא חוויה מיוחדת שממלאת אותי באנרגיה יצירתית. יערה יודעת איך לעורר השראה.",
-      name: "מיכל",
-      details: "תלמידה במשך שנתיים",
-      rating: 5,
-      avatarColor: "linear-gradient(135deg, #45B7D1, #96CEB4)"
+      id: 't3',
+      src: this.asset('WhatsApp Image 2026-07-14 at 16.20.47 (2).jpeg'),
+      alt: 'המלצה מוואטסאפ',
+      ratio: 1.35,
     },
     {
-      text: "התחלתי בלי שום ניסיון בציור, והיום אני מציירת יצירות שאני גאה בהן. השיעורים האישיים עזרו לי להתקדם בקצב שלי.",
-      name: "דני",
-      details: "תלמיד במשך שנה",
-      rating: 5,
-      avatarColor: "linear-gradient(135deg, #A8E6CF, #FFD3A5)"
+      id: 't4',
+      src: this.asset('WhatsApp Image 2026-07-14 at 16.20.48.jpeg'),
+      alt: 'המלצה מוואטסאפ',
+      ratio: 3.16,
     },
     {
-      text: "הגעתי לסטודיו אחרי שנים שלא ציירתי. יערה החזירה לי את הביטחון ואת האהבה לאמנות. המקום הזה הוא קסם אמיתי.",
-      name: "רחל",
-      details: "תלמידה במשך 6 חודשים",
-      rating: 5,
-      avatarColor: "linear-gradient(135deg, #FF9A9E, #FECFEF)"
+      id: 't5',
+      src: this.asset('WhatsApp Image 2026-07-14 at 16.20.48 (1).jpeg'),
+      alt: 'המלצה מוואטסאפ',
+      ratio: 1.52,
     },
     {
-      text: "השילוב בין מקצועיות לחום אנושי הוא מושלם. כל שיעור לימד אותי משהו חדש, וגם כשטעיתי - זה היה חלק מהתהליך.",
-      name: "עמית",
-      details: "תלמיד במשך שנה ושלושה חודשים",
-      rating: 5,
-      avatarColor: "linear-gradient(135deg, #667eea, #764ba2)"
-    }
+      id: 't6',
+      src: this.asset('WhatsApp Image 2026-07-14 at 16.20.48 (2).jpeg'),
+      alt: 'המלצה מוואטסאפ',
+      ratio: 2.06,
+    },
+    {
+      id: 't7',
+      src: this.asset('WhatsApp Image 2026-07-14 at 16.20.48 (3).jpeg'),
+      alt: 'המלצה מוואטסאפ',
+      ratio: 3.61,
+    },
+    {
+      id: 't8',
+      src: this.asset('WhatsApp Image 2026-07-14 at 16.20.48 (4).jpeg'),
+      alt: 'המלצה מוואטסאפ',
+      ratio: 3.37,
+    },
+    {
+      id: 't9',
+      src: this.asset('WhatsApp Image 2026-07-14 at 16.20.48 (5).jpeg'),
+      alt: 'המלצה מוואטסאפ',
+      ratio: 2.8,
+    },
+    {
+      id: 't10',
+      src: this.asset('WhatsApp Image 2026-07-14 at 17.53.29.jpeg'),
+      alt: 'המלצה מוואטסאפ',
+      ratio: 0.68,
+    },
   ];
 
-  getStars(rating: number): string {
-    const fullStars = '★'.repeat(rating);
-    const emptyStars = '☆'.repeat(5 - rating);
-    return fullStars + emptyStars;
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+
+  ngOnInit(): void {
+    this.startAutoplay();
   }
 
-  scrollToSection(sectionId: string, event?: Event): void {
-    if (event) {
-      event.preventDefault();
+  ngOnDestroy(): void {
+    this.stopAutoplay();
+    if (this.resumeTimer) {
+      clearTimeout(this.resumeTimer);
+      this.resumeTimer = null;
     }
-    
-    if (!isPlatformBrowser(this.platformId)) {
+  }
+
+  get activeTestimonial(): WhatsAppTestimonial {
+    return this.testimonials[this.activeIndex];
+  }
+
+  isPortrait(item: WhatsAppTestimonial): boolean {
+    return item.ratio < 1;
+  }
+
+  selectSpotlight(index: number, fromUser = false): void {
+    if (index === this.activeIndex || this.spotlightLeaving) {
       return;
     }
-    
-    // Check if we're on the main page or need to navigate there first
-    const currentRoute = this.router.url.split('?')[0];
-    const isMainPage = currentRoute === '/' || currentRoute === '';
-    
-    if (!isMainPage) {
-      // Navigate to main page with fragment and query params
-      const queryParams = this.route.snapshot.queryParams;
-      this.router.navigate(['/'], {
-        fragment: sectionId,
-        queryParams: queryParams,
-        queryParamsHandling: 'merge'
-      }).then(() => {
-        setTimeout(() => {
-          const element = document.getElementById(sectionId);
-          if (element) {
-            element.scrollIntoView({ 
-              behavior: 'smooth',
-              block: 'start'
-            });
-          }
-        }, 100);
-      });
-    } else {
-      // Preserve query parameters
-      const queryParams = this.route.snapshot.queryParams;
-      
-      // Navigate with fragment and query params preserved
-      this.router.navigate([], {
-        fragment: sectionId,
-        queryParams: queryParams,
-        queryParamsHandling: 'merge'
-      }).then(() => {
-        // Scroll to section after navigation
-        setTimeout(() => {
-          const element = document.getElementById(sectionId);
-          if (element) {
-            element.scrollIntoView({ 
-              behavior: 'smooth',
-              block: 'start'
-            });
-          }
-        }, 100);
-      });
+    if (fromUser) {
+      this.pauseAutoplayTemporarily();
     }
+    this.spotlightLeaving = true;
+    window.setTimeout(() => {
+      this.activeIndex = index;
+      this.spotlightLeaving = false;
+    }, 200);
+  }
+
+  nextSpotlight(fromUser = false): void {
+    this.selectSpotlight((this.activeIndex + 1) % this.testimonials.length, fromUser);
+  }
+
+  prevSpotlight(): void {
+    this.selectSpotlight(
+      (this.activeIndex - 1 + this.testimonials.length) % this.testimonials.length,
+      true
+    );
+  }
+
+  openLightbox(src: string): void {
+    this.pauseAutoplayTemporarily();
+    this.lightboxSrc = src;
+  }
+
+  closeLightbox(): void {
+    this.lightboxSrc = null;
+    this.startAutoplay();
+  }
+
+  trackById(_: number, item: WhatsAppTestimonial): string {
+    return item.id;
+  }
+
+  private startAutoplay(): void {
+    if (!isPlatformBrowser(this.platformId) || this.testimonials.length < 2) {
+      return;
+    }
+    this.stopAutoplay();
+    this.autoplayTimer = setInterval(() => {
+      if (this.lightboxSrc || this.spotlightLeaving) {
+        return;
+      }
+      this.nextSpotlight(false);
+    }, this.autoplayMs);
+  }
+
+  private stopAutoplay(): void {
+    if (this.autoplayTimer) {
+      clearInterval(this.autoplayTimer);
+      this.autoplayTimer = null;
+    }
+  }
+
+  /** Pause while user interacts, then resume after a short delay */
+  private pauseAutoplayTemporarily(): void {
+    this.stopAutoplay();
+    if (this.resumeTimer) {
+      clearTimeout(this.resumeTimer);
+    }
+    this.resumeTimer = setTimeout(() => {
+      this.resumeTimer = null;
+      if (!this.lightboxSrc) {
+        this.startAutoplay();
+      }
+    }, this.autoplayMs * 2);
+  }
+
+  private asset(filename: string): string {
+    return `assets/images/testamonials/${encodeURIComponent(filename)}`;
   }
 }
