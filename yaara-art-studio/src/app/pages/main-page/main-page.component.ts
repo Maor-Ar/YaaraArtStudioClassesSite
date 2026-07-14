@@ -8,9 +8,9 @@ import { AboutComponent } from '../../components/about/about.component';
 import { PillarsComponent } from '../../components/pillars/pillars.component';
 import { GalleryComponent } from '../../components/gallery/gallery.component';
 import { ClassesAlternatingComponent } from '../../components/classes-alternating/classes-alternating.component';
-import { ClassesBackgroundComponent } from '../../components/classes-background/classes-background.component';
 import { TestimonialsComponent } from '../../components/testimonials/testimonials.component';
 import { FormComponent } from '../../components/form/form.component';
+import { TeachersComponent } from '../../components/teachers/teachers.component';
 
 @Component({
   selector: 'app-main-page',
@@ -24,23 +24,19 @@ import { FormComponent } from '../../components/form/form.component';
     PillarsComponent,
     GalleryComponent,
     ClassesAlternatingComponent,
-    ClassesBackgroundComponent,
     TestimonialsComponent,
-    FormComponent
+    FormComponent,
+    TeachersComponent
   ],
   templateUrl: './main-page.component.html',
   styleUrl: './main-page.component.scss'
 })
 export class MainPageComponent implements OnInit {
   showWhatsAppButton = true;
-  showAlternatingComponent: boolean;
   isWhatsAppExpanded = false;
   viewMode: 'adult' | 'child' | 'both' = 'both';
 
-  constructor(private route: ActivatedRoute) {
-    // Randomly choose which component to show (50/50 chance)
-    this.showAlternatingComponent = Math.random() < 0.5;
-  }
+  constructor(private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     // Read view query parameter and normalize values
