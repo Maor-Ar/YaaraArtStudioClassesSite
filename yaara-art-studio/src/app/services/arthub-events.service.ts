@@ -7,6 +7,8 @@ import {
   query,
   where,
   addDoc,
+  setDoc,
+  increment,
   Timestamp,
   DocumentData,
 } from 'firebase/firestore';
@@ -34,6 +36,7 @@ export interface ReserveTrialSpotInput {
 
 const CONFIRMED = 'confirmed';
 const TRIAL_NAME_SUFFIX = 'אוטומטי שיעור נסיון';
+const OCCURRENCE_COUNTS_COLLECTION = 'occurrence_counts';
 
 @Injectable({
   providedIn: 'root',
@@ -97,8 +100,13 @@ export class ArthubEventsService {
     }
 
     const eventIds = [...new Set(occurrences.map((o) => o.baseEventId))];
-    const counts = await this.countConfirmedByEventAndDate(eventIds);
-    const cancellations = await this.loadCancellations(eventIds, occurrences.map((o) => o.occurrenceDateKey));
+    const [scannedCounts, counterCounts, cancellations] = await Promise.all([
+      this.countConfirmedByEventAndDate(eventIds),
+      this.loadOccurrenceCounts(
+        occurrences.map((o) => ({ eventId: o.baseEventId, dateKey: o.occurrenceDateKey }))
+      ),
+      this.loadCancellations(eventIds, occurrences.map((o) => o.occurrenceDateKey)),
+    ]);
 
     const available: AdultClassOccurrence[] = [];
 
@@ -109,7 +117,10 @@ export class ArthubEventsService {
       }
 
       const countKey = `${occ.baseEventId}:${occ.occurrenceDateKey}`;
-      const registeredCount = counts[countKey] || 0;
+      const registeredCount = this.resolveRegisteredCount(
+        counterCounts.get(countKey),
+        scannedCounts[countKey] || 0
+      );
       const availableSpots = occ.maxRegistrations - registeredCount;
       if (availableSpots <= 0) {
         continue;
@@ -176,24 +187,59 @@ export class ArthubEventsService {
       throw new Error('This class occurrence is cancelled');
     }
 
-    const counts = await this.countConfirmedByEventAndDate([eventId]);
-    const registeredCount = counts[`${eventId}:${occurrenceDateKey}`] || 0;
+    const countRef = doc(db, OCCURRENCE_COUNTS_COLLECTION, `${eventId}_${occurrenceDateKey}`);
+    let counterCount: number | null = null;
+    let scannedCount = 0;
+    try {
+      const [countSnap, scannedCounts] = await Promise.all([
+        getDoc(countRef),
+        this.countConfirmedByEventAndDate([eventId]),
+      ]);
+      scannedCount = scannedCounts[`${eventId}:${occurrenceDateKey}`] || 0;
+      counterCount = countSnap.exists() ? Number(countSnap.data()?.['count']) || 0 : null;
+    } catch (error) {
+      console.warn('⚠️ [ArthubEvents] Counter read failed, using registration scan only:', error);
+      const scannedCounts = await this.countConfirmedByEventAndDate([eventId]);
+      scannedCount = scannedCounts[`${eventId}:${occurrenceDateKey}`] || 0;
+    }
+    const registeredCount = this.resolveRegisteredCount(counterCount, scannedCount);
     const maxRegistrations = Number(event['maxRegistrations']) || 6;
     if (registeredCount >= maxRegistrations) {
       throw new Error('Event is at full capacity');
     }
 
     const now = new Date();
+    const nowTs = Timestamp.fromDate(now);
+    const occurrenceTs = Timestamp.fromDate(occurrenceDate);
     const docRef = await addDoc(collection(db, 'event_manual_registrations'), {
       customerName,
       eventId,
-      occurrenceDate: Timestamp.fromDate(occurrenceDate),
-      date: Timestamp.fromDate(occurrenceDate),
+      occurrenceDate: occurrenceTs,
+      date: occurrenceTs,
+      dateKey: occurrenceDateKey,
       status: CONFIRMED,
       source: 'trial_site',
-      createdAt: Timestamp.fromDate(now),
-      updatedAt: Timestamp.fromDate(now),
+      createdAt: nowTs,
+      updatedAt: nowTs,
     });
+
+    // Keep ArtHub capacity counter in sync (same collection the app checks).
+    try {
+      await this.bumpOccurrenceCount({
+        eventId,
+        dateKey: occurrenceDateKey,
+        previousCounter: counterCount,
+        previousScan: scannedCount,
+      });
+    } catch (error) {
+      console.error(
+        '❌ [ArthubEvents] Reserved manually but failed to bump occurrence_counts. Deploy updated firestore.rules.',
+        error
+      );
+      throw new Error(
+        'Registration saved but capacity counter update failed. Deploy ArtHub firestore.rules, then re-check this class.'
+      );
+    }
 
     return docRef.id;
   }
@@ -210,6 +256,69 @@ export class ArthubEventsService {
     }
 
     return true;
+  }
+
+  /**
+   * Prefer the higher of counter vs registration scan so a stale-low counter
+   * (from older trial bookings) cannot hide a full class.
+   */
+  private resolveRegisteredCount(counterCount: number | null | undefined, scannedCount: number): number {
+    if (counterCount == null || Number.isNaN(counterCount)) {
+      return scannedCount;
+    }
+    return Math.max(counterCount, scannedCount);
+  }
+
+  private async bumpOccurrenceCount(input: {
+    eventId: string;
+    dateKey: string;
+    previousCounter: number | null;
+    previousScan: number;
+  }): Promise<void> {
+    const db = this.firebaseService.getFirestore();
+    if (!db) {
+      return;
+    }
+
+    const { eventId, dateKey, previousCounter, previousScan } = input;
+    const countRef = doc(db, OCCURRENCE_COUNTS_COLLECTION, `${eventId}_${dateKey}`);
+    const updatedAt = Timestamp.fromDate(new Date());
+
+    if (previousCounter == null) {
+      // Counter missing: seed to true total after this reservation (scan + 1).
+      await setDoc(countRef, {
+        eventId,
+        dateKey,
+        count: previousScan + 1,
+        updatedAt,
+      });
+      return;
+    }
+
+    if (previousCounter < previousScan) {
+      // Heal stale-low counter, then reflect this new registration.
+      await setDoc(countRef, {
+        eventId,
+        dateKey,
+        count: previousScan + 1,
+        updatedAt,
+      });
+      return;
+    }
+
+    // Normal path: atomic +1 (matches ArtHub adjustOccurrenceCount).
+    // Use set+merge with increment; rules allow update only as count+1.
+    // If the doc was created since our read, increment still works.
+    await setDoc(
+      countRef,
+      {
+        eventId,
+        dateKey,
+        count: increment(1),
+        updatedAt,
+      },
+      { merge: true }
+    );
   }
 
   private expandOccurrences(
@@ -289,10 +398,17 @@ export class ArthubEventsService {
       ]);
 
       const addCount = (data: DocumentData) => {
-        const dateField = data['occurrenceDate'] || data['date'];
-        if (!dateField) return;
-        const regDate = dateField?.toDate ? dateField.toDate() : new Date(dateField);
-        const dateKey = this.toUtcMidnight(regDate).toISOString().split('T')[0];
+        const dateKeyFromField =
+          typeof data['dateKey'] === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(data['dateKey'])
+            ? data['dateKey']
+            : null;
+        let dateKey = dateKeyFromField;
+        if (!dateKey) {
+          const dateField = data['occurrenceDate'] || data['date'];
+          if (!dateField) return;
+          const regDate = dateField?.toDate ? dateField.toDate() : new Date(dateField);
+          dateKey = this.toUtcMidnight(regDate).toISOString().split('T')[0];
+        }
         const key = `${data['eventId']}:${dateKey}`;
         counts[key] = (counts[key] || 0) + 1;
       };
@@ -302,6 +418,43 @@ export class ArthubEventsService {
     }
 
     return counts;
+  }
+
+  private async loadOccurrenceCounts(
+    keys: Array<{ eventId: string; dateKey: string }>
+  ): Promise<Map<string, number>> {
+    const db = this.firebaseService.getFirestore();
+    const result = new Map<string, number>();
+    if (!db || keys.length === 0) {
+      return result;
+    }
+
+    const uniqueDocIds = [
+      ...new Set(keys.map(({ eventId, dateKey }) => `${eventId}_${dateKey}`)),
+    ];
+
+    try {
+      await Promise.all(
+        uniqueDocIds.map(async (docId) => {
+          const snap = await getDoc(doc(db, OCCURRENCE_COUNTS_COLLECTION, docId));
+          if (!snap.exists()) {
+            return;
+          }
+          const data = snap.data();
+          const eventId = String(data?.['eventId'] || '');
+          const dateKey = String(data?.['dateKey'] || '');
+          if (!eventId || !dateKey) {
+            return;
+          }
+          result.set(`${eventId}:${dateKey}`, Number(data?.['count']) || 0);
+        })
+      );
+    } catch (error) {
+      // Rules may not allow occurrence_counts yet; fall back to registration scans.
+      console.warn('⚠️ [ArthubEvents] Could not read occurrence_counts:', error);
+    }
+
+    return result;
   }
 
   private async loadCancellations(

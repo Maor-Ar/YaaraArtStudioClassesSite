@@ -15,6 +15,8 @@ import {
   doc,
   getDoc,
   addDoc,
+  setDoc,
+  increment,
   Timestamp,
 } from 'firebase/firestore';
 
@@ -151,12 +153,34 @@ async function main() {
       eventId: target.baseEventId,
       occurrenceDate: Timestamp.fromDate(occurrenceDate),
       date: Timestamp.fromDate(occurrenceDate),
+      dateKey: target.occurrenceDateKey,
       status: CONFIRMED,
       source: 'trial_site',
       createdAt: Timestamp.fromDate(now),
       updatedAt: Timestamp.fromDate(now),
     });
-    console.log(`   ✅ Created manual reservation ${ref.id}`);
+    const countRef = doc(db, 'occurrence_counts', `${target.baseEventId}_${target.occurrenceDateKey}`);
+    const countSnap = await getDoc(countRef);
+    if (countSnap.exists()) {
+      await setDoc(
+        countRef,
+        {
+          eventId: target.baseEventId,
+          dateKey: target.occurrenceDateKey,
+          count: increment(1),
+          updatedAt: Timestamp.fromDate(now),
+        },
+        { merge: true }
+      );
+    } else {
+      await setDoc(countRef, {
+        eventId: target.baseEventId,
+        dateKey: target.occurrenceDateKey,
+        count: 1,
+        updatedAt: Timestamp.fromDate(now),
+      });
+    }
+    console.log(`   ✅ Created manual reservation ${ref.id} and bumped occurrence_counts`);
     console.log('   (Client delete is denied by design; clean up with Admin SDK if needed)');
   } else if (DO_WRITE) {
     console.log('⚠️  No open occurrences to write against.');
