@@ -27,7 +27,6 @@ const firebaseConfig = {
   appId: '1:102013040020:web:a773d91232908f2bb44b81',
 };
 
-const ADULT_START_TIMES = new Set(['18:00', '19:30']);
 const CONFIRMED = 'confirmed';
 const DO_WRITE = process.argv.includes('--write');
 
@@ -79,10 +78,9 @@ async function main() {
 
   const adultEvents = eventsSnap.docs
     .map((d) => ({ id: d.id, ...d.data() }))
-    .filter((e) => ADULT_START_TIMES.has(String(e.startTime || '')))
     .filter((e) => !String(e.title || '').includes('ילדים') && !String(e.title || '').includes('נוער'));
 
-  console.log(`   Adult evening classes: ${adultEvents.length}`);
+  console.log(`   Adult classes (any time of day): ${adultEvents.length}`);
   adultEvents.forEach((e) => {
     console.log(`   - ${e.title} @ ${e.startTime} (id=${e.id}, recurring=${e.isRecurring})`);
   });

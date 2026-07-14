@@ -32,7 +32,6 @@ export interface ReserveTrialSpotInput {
   customerName: string;
 }
 
-const ADULT_START_TIMES = new Set(['18:00', '19:30']);
 const CONFIRMED = 'confirmed';
 const TRIAL_NAME_SUFFIX = 'אוטומטי שיעור נסיון';
 
@@ -54,7 +53,7 @@ export class ArthubEventsService {
 
     const adultEvents = eventsSnap.docs
       .map((d) => ({ id: d.id, ...d.data() } as DocumentData & { id: string }))
-      .filter((event) => this.isAdultEveningClass(event));
+      .filter((event) => this.isAdultClass(event));
 
     if (adultEvents.length === 0) {
       return [];
@@ -203,14 +202,8 @@ export class ArthubEventsService {
     return `${(firstName || '').trim()} ${(lastName || '').trim()} ${TRIAL_NAME_SUFFIX}`.trim();
   }
 
-  private isAdultEveningClass(event: DocumentData): boolean {
-    const startTime = String(event['startTime'] || '');
-    if (!ADULT_START_TIMES.has(startTime)) {
-      return false;
-    }
-
-    // Children classes use afternoon slots; adult seeded classes are evening.
-    // Also exclude known children's title if present with evening time by mistake.
+  private isAdultClass(event: DocumentData): boolean {
+    // Exclude known children's titles; do not filter by time of day.
     const title = String(event['title'] || '');
     if (title.includes('ילדים') || title.includes('נוער')) {
       return false;

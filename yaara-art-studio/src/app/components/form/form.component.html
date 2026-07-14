@@ -94,7 +94,7 @@
                     *ngFor="let occurrence of availableAdultOccurrences"
                     [value]="occurrence.occurrenceId"
                   >
-                    {{ occurrence.displayLabel }} ({{ occurrence.availableSpots }})
+                    {{ occurrence.displayLabel }} ({{ occurrence.availableSpots }} מקומות פנויים)
                   </option>
                 </select>
                 <div class="error-message" *ngIf="isFieldInvalid('selectedOccurrenceId')">
