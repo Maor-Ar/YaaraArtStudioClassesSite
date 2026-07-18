@@ -123,11 +123,11 @@
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-          <button class="btn btn-primary calendar-btn" (click)="addToCalendar()" [disabled]="!lessonDate">
+          <button class="btn btn-primary calendar-btn" (click)="openCalendarModal()" [disabled]="!lessonDate">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
             </svg>
-            <span>הוסף ליומן</span>
+            <span>הוסף ליומן האישי</span>
           </button>
 
           <button class="btn btn-secondary home-btn" (click)="navigateToHome()">
@@ -136,6 +136,107 @@
             </svg>
             <span>חזרה לעמוד הבית</span>
           </button>
+        </div>
+
+        <!-- Calendar chooser modal -->
+        <div
+          class="calendar-modal-overlay"
+          *ngIf="showCalendarModal"
+          (click)="onCalendarOverlayClick($event)"
+          role="presentation"
+        >
+          <div
+            class="calendar-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="calendar-modal-title"
+            (click)="$event.stopPropagation()"
+          >
+            <button type="button" class="calendar-modal-close" (click)="closeCalendarModal()" aria-label="סגירה">
+              ×
+            </button>
+
+            <div class="calendar-modal-header">
+              <div class="calendar-modal-icon" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                </svg>
+              </div>
+              <h2 id="calendar-modal-title">הוספה ליומן האישי</h2>
+              <p>בחרו את היומן שבו תרצו לשמור את השיעור</p>
+            </div>
+
+            <div class="calendar-options">
+              <button type="button" class="calendar-option" (click)="addToGoogleCalendar()">
+                <span class="option-logo google-logo" aria-hidden="true">
+                  <svg viewBox="0 0 48 48" width="28" height="28">
+                    <path fill="#FFF" d="M36 40H12c-2.2 0-4-1.8-4-4V12c0-2.2 1.8-4 4-4h24c2.2 0 4 1.8 4 4v24c0 2.2-1.8 4-4 4z"/>
+                    <path fill="#EA4335" d="M36 8H12c-2.2 0-4 1.8-4 4v2h32v-2c0-2.2-1.8-4-4-4z"/>
+                    <path fill="#4285F4" d="M16 20h4v4h-4zm6 0h4v4h-4zm6 0h4v4h-4zM16 26h4v4h-4zm6 0h4v4h-4zm6 0h4v4h-4zM16 32h4v4h-4zm6 0h4v4h-4zm6 0h4v4h-4z"/>
+                    <circle fill="#34A853" cx="34" cy="34" r="7"/>
+                    <path fill="#FFF" d="M34 30.2v3.2h3.2v1.5H34v3.2h-1.5v-3.2h-3.2v-1.5h3.2v-3.2z"/>
+                  </svg>
+                </span>
+                <span class="option-copy">
+                  <span class="option-title">Google Calendar</span>
+                  <span class="option-desc">פתיחה ישירה ביומן Google</span>
+                </span>
+                <span class="option-chevron" aria-hidden="true">‹</span>
+              </button>
+
+              <button type="button" class="calendar-option" (click)="addToOutlookCalendar()">
+                <span class="option-logo outlook-logo" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="28" height="28">
+                    <path fill="#0078D4" d="M13.5 2.5h6.2c.9 0 1.6.7 1.6 1.6v15.8c0 .9-.7 1.6-1.6 1.6h-6.2V2.5z"/>
+                    <path fill="#0364B8" d="M13.5 12.2l7.8-4.7v10.8c0 .9-.7 1.6-1.6 1.6h-6.2V12.2z"/>
+                    <path fill="#28A8EA" d="M2.7 5.8h11.5v12.4H2.7c-.9 0-1.6-.7-1.6-1.6V7.4c0-.9.7-1.6 1.6-1.6z"/>
+                    <circle fill="#fff" cx="8.4" cy="12" r="3.2"/>
+                    <circle fill="#0078D4" cx="8.4" cy="12" r="2"/>
+                  </svg>
+                </span>
+                <span class="option-copy">
+                  <span class="option-title">Outlook</span>
+                  <span class="option-desc">פתיחה ישירה ביומן Outlook</span>
+                </span>
+                <span class="option-chevron" aria-hidden="true">‹</span>
+              </button>
+
+              <button
+                type="button"
+                class="calendar-option"
+                *ngIf="showAppleCalendar"
+                (click)="addToAppleCalendar()"
+              >
+                <span class="option-logo apple-logo" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                    <path d="M16.7 12.7c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 3 2.3 1.2 0 1.6-.7 3.1-.7s1.8.7 3.1.7 2.1-1.1 2.9-2.2c.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.5-3.9zM14.8 5.4c.6-.8 1.1-1.9.9-3-.9 0-2 .6-2.6 1.4-.6.7-1.1 1.8-.9 2.9 1 0 2-.5 2.6-1.3z"/>
+                  </svg>
+                </span>
+                <span class="option-copy">
+                  <span class="option-title">Apple Calendar</span>
+                  <span class="option-desc">פתיחה ישירה באפליקציית היומן</span>
+                </span>
+                <span class="option-chevron" aria-hidden="true">‹</span>
+              </button>
+            </div>
+
+            <div class="calendar-fallback">
+              <button type="button" class="calendar-option calendar-option-ics" (click)="downloadIcsFile()">
+                <span class="option-logo ics-logo" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7">
+                    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z" stroke-linejoin="round"/>
+                    <path d="M14 3v5h5" stroke-linejoin="round"/>
+                    <path d="M8 13h8M8 17h5" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                <span class="option-copy">
+                  <span class="option-title">הורדת קובץ ICS</span>
+                  <span class="option-desc">לייבוא ידני לכל יומן אחר</span>
+                </span>
+                <span class="option-chevron" aria-hidden="true">‹</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Additional Information -->

@@ -38,6 +38,9 @@ export class PaymentSuccessComponent implements OnInit {
   spotReserveError: string | null = null;
   isReservingSpot = false;
 
+  showCalendarModal = false;
+  showAppleCalendar = false;
+
   constructor(
     private router: Router,
     private arthubEvents: ArthubEventsService,
@@ -50,6 +53,7 @@ export class PaymentSuccessComponent implements OnInit {
       window.scrollTo(0, 0);
       this.loadPaymentData();
       this.loadFormData();
+      this.showAppleCalendar = this.detectAppleDevice();
       void this.reserveAdultSpotIfNeeded();
       
       // Check if Meta Pixel is loaded before tracking
@@ -63,6 +67,19 @@ export class PaymentSuccessComponent implements OnInit {
       
       this.trackMetaPixelPurchase();
     }
+  }
+
+  private detectAppleDevice(): boolean {
+    if (typeof navigator === 'undefined') {
+      return false;
+    }
+    const ua = navigator.userAgent || '';
+    const platform = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData
+      ?.platform || navigator.platform || '';
+    const appleUa = /iPhone|iPad|iPod|Macintosh|Mac OS X/i.test(ua) || /Mac|iPhone|iPad|iPod/i.test(platform);
+    // Exclude Windows with "like Mac" edge cases; include iPadOS desktop UA
+    const isTouchMac = platform === 'MacIntel' && (navigator.maxTouchPoints || 0) > 1;
+    return appleUa || isTouchMac;
   }
 
   /**
@@ -164,56 +181,185 @@ export class PaymentSuccessComponent implements OnInit {
     }
   }
 
-  /**
-   * Add reserved class event to Google Calendar
-   */
-  addToCalendar(): void {
-    if (!isPlatformBrowser(this.platformId)) {
-      return;
-    }
-
+  openCalendarModal(): void {
     if (!this.lessonDate) {
-      console.error('Lesson date not found');
       return;
     }
+    this.showCalendarModal = true;
+  }
 
-    const name = this.fullName || 'שיעור ניסיון';
-    const studioAddress = 'תל חי 39 כפר סבא, קומה 1';
-    
+  closeCalendarModal(): void {
+    this.showCalendarModal = false;
+  }
+
+  onCalendarOverlayClick(event: Event): void {
+    if (event.target === event.currentTarget) {
+      this.closeCalendarModal();
+    }
+  }
+
+  addToGoogleCalendar(): void {
+    const event = this.buildCalendarEvent();
+    if (!event) {
+      return;
+    }
+    const startStr = this.toUtcCompact(event.start);
+    const endStr = this.toUtcCompact(event.end);
+    const url =
+      `https://www.google.com/calendar/render?action=TEMPLATE` +
+      `&text=${encodeURIComponent(event.title)}` +
+      `&dates=${startStr}/${endStr}` +
+      `&details=${encodeURIComponent(event.description)}` +
+      `&location=${encodeURIComponent(event.location)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    this.closeCalendarModal();
+  }
+
+  addToOutlookCalendar(): void {
+    const event = this.buildCalendarEvent();
+    if (!event) {
+      return;
+    }
+    const url =
+      `https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent` +
+      `&subject=${encodeURIComponent(event.title)}` +
+      `&startdt=${encodeURIComponent(event.start.toISOString())}` +
+      `&enddt=${encodeURIComponent(event.end.toISOString())}` +
+      `&body=${encodeURIComponent(event.description)}` +
+      `&location=${encodeURIComponent(event.location)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    this.closeCalendarModal();
+  }
+
+  /**
+   * Apple has no public web "create event" URL.
+   * On Apple devices, opening a text/calendar blob launches Calendar's add-event UI
+   * (not a file-download flow).
+   */
+  addToAppleCalendar(): void {
+    const event = this.buildCalendarEvent();
+    if (!event || !isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    const ics = this.buildIcsContent(event);
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    // Navigate in-place so iOS/macOS Calendar opens the event sheet
+    window.location.href = url;
+    window.setTimeout(() => URL.revokeObjectURL(url), 2000);
+    this.closeCalendarModal();
+  }
+
+  downloadIcsFile(): void {
+    const event = this.buildCalendarEvent();
+    if (!event || !isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    const ics = this.buildIcsContent(event);
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'studio-buda-trial.ics';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.setTimeout(() => URL.revokeObjectURL(url), 2000);
+    this.closeCalendarModal();
+  }
+
+  private buildCalendarEvent(): {
+    title: string;
+    description: string;
+    location: string;
+    start: Date;
+    end: Date;
+  } | null {
+    if (!isPlatformBrowser(this.platformId) || !this.lessonDate) {
+      return null;
+    }
+
     // Parse lesson date (format: "DD/MM/YYYY HH:MM-HH:MM")
-    // Example: "07/12/2025 18:00-19:30"
     const lessonParts = this.lessonDate.split(' ');
     if (lessonParts.length !== 2) {
       console.error('Invalid lesson date format');
-      return;
+      return null;
     }
-    
-    const datePart = lessonParts[0]; // "07/12/2025"
-    const timePart = lessonParts[1]; // "18:00-19:30"
-    
+
+    const datePart = lessonParts[0];
+    const timePart = lessonParts[1];
     const [day, month, year] = datePart.split('/');
     const [startTime, endTime] = timePart.split('-');
     const [startHour, startMinute] = startTime.split(':');
     const [endHour, endMinute] = endTime.split(':');
-    
-    // Create date objects in local time
-    const startDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(startHour), parseInt(startMinute));
-    const endDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(endHour), parseInt(endMinute));
-    
-    const summary = encodeURIComponent(`שיעור ניסיון - סטודיו בודה: ${name}`);
-    const location = encodeURIComponent(studioAddress);
-    let description = encodeURIComponent(`שיעור ניסיון בסטודיו בודה`);
-    if (this.background) {
-      description = encodeURIComponent(`שיעור ניסיון בסטודיו בודה\nרקע: ${this.background}`);
+
+    const start = new Date(
+      parseInt(year, 10),
+      parseInt(month, 10) - 1,
+      parseInt(day, 10),
+      parseInt(startHour, 10),
+      parseInt(startMinute, 10)
+    );
+    const end = new Date(
+      parseInt(year, 10),
+      parseInt(month, 10) - 1,
+      parseInt(day, 10),
+      parseInt(endHour, 10),
+      parseInt(endMinute, 10)
+    );
+
+    const name = this.fullName || 'שיעור ניסיון';
+    const title = `שיעור ניסיון - סטודיו בודה: ${name}`;
+    const location = 'תל חי 39 כפר סבא, קומה 1';
+    let description = 'שיעור ניסיון בסטודיו בודה';
+    if (this.classTitle) {
+      description += `\nשיעור: ${this.classTitle}`;
     }
-    
-    // Format dates for Google Calendar (YYYYMMDDTHHMMSS)
-    const startStr = startDate.toISOString().replace(/-|:|\.\d{3}/g, '');
-    const endStr = endDate.toISOString().replace(/-|:|\.\d{3}/g, '');
-    
-    const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${summary}&dates=${startStr}/${endStr}&details=${description}&location=${location}`;
-    
-    window.open(url, '_blank');
+    if (this.background) {
+      description += `\nרקע: ${this.background}`;
+    }
+
+    return { title, description, location, start, end };
+  }
+
+  private toUtcCompact(date: Date): string {
+    return date.toISOString().replace(/-|:|\.\d{3}/g, '');
+  }
+
+  private buildIcsContent(event: {
+    title: string;
+    description: string;
+    location: string;
+    start: Date;
+    end: Date;
+  }): string {
+    const escape = (value: string) =>
+      value
+        .replace(/\\/g, '\\\\')
+        .replace(/;/g, '\\;')
+        .replace(/,/g, '\\,')
+        .replace(/\n/g, '\\n');
+
+    const stamp = this.toUtcCompact(new Date());
+    const uid = `${stamp}-${Math.random().toString(36).slice(2)}@studiobuda.co.il`;
+
+    return [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Studio Buda//Trial Lesson//HE',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH',
+      'BEGIN:VEVENT',
+      `UID:${uid}`,
+      `DTSTAMP:${stamp}`,
+      `DTSTART:${this.toUtcCompact(event.start)}`,
+      `DTEND:${this.toUtcCompact(event.end)}`,
+      `SUMMARY:${escape(event.title)}`,
+      `DESCRIPTION:${escape(event.description)}`,
+      `LOCATION:${escape(event.location)}`,
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join('\r\n');
   }
 
   /**

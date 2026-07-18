@@ -349,6 +349,220 @@
   }
 }
 
+/* Calendar chooser modal */
+.calendar-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+  background: rgba(26, 15, 46, 0.62);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: calendarFadeIn 0.2s ease;
+}
+
+.calendar-modal {
+  position: relative;
+  width: min(100%, 420px);
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-heavy);
+  padding: 1.5rem 1.25rem 1.25rem;
+  text-align: right;
+  animation: calendarSlideUp 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  border: 1px solid color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+.calendar-modal-close {
+  position: absolute;
+  top: 0.65rem;
+  inset-inline-start: 0.65rem;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--background) 80%, var(--white));
+  color: var(--primary);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.calendar-modal-header {
+  text-align: center;
+  margin-bottom: 1.25rem;
+
+  h2 {
+    font-family: var(--font-amatic);
+    font-size: 2rem;
+    color: var(--primary);
+    margin: 0.55rem 0 0.25rem;
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-light);
+    font-size: 0.98rem;
+  }
+}
+
+.calendar-modal-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: var(--primary);
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--accent-light) 70%, var(--white)),
+    color-mix(in srgb, var(--background) 80%, var(--white))
+  );
+  box-shadow: var(--shadow-light);
+}
+
+.calendar-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.calendar-option {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  padding: 0.85rem 0.95rem;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid color-mix(in srgb, var(--primary) 14%, transparent);
+  background: color-mix(in srgb, var(--background) 45%, var(--white));
+  color: var(--text-dark);
+  cursor: pointer;
+  text-align: right;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+    border-color var(--transition-fast), background var(--transition-fast);
+  min-height: 68px;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--primary) 40%, transparent);
+    box-shadow: var(--shadow-medium);
+    background: var(--white);
+  }
+}
+
+.option-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--white);
+  box-shadow: var(--shadow-light);
+  flex-shrink: 0;
+
+  svg {
+    display: block;
+  }
+}
+
+.apple-logo {
+  color: var(--text-dark);
+}
+
+.ics-logo {
+  color: var(--text-light);
+}
+
+.option-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.option-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--primary);
+}
+
+.option-desc {
+  font-size: 0.88rem;
+  color: var(--text-light);
+  line-height: 1.35;
+}
+
+.option-chevron {
+  font-size: 1.4rem;
+  color: color-mix(in srgb, var(--primary) 55%, transparent);
+  line-height: 1;
+}
+
+.calendar-fallback {
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px dashed color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+.calendar-option-ics {
+  background: transparent;
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--primary) 22%, transparent);
+  opacity: 0.88;
+  min-height: 60px;
+
+  .option-title {
+    font-weight: 600;
+    font-size: 0.98rem;
+    color: var(--text-light);
+  }
+
+  .option-desc {
+    font-size: 0.82rem;
+  }
+
+  .option-logo {
+    background: color-mix(in srgb, var(--background) 70%, var(--white));
+    box-shadow: none;
+  }
+
+  &:hover {
+    opacity: 1;
+    background: color-mix(in srgb, var(--background) 35%, var(--white));
+    box-shadow: none;
+  }
+}
+
+@keyframes calendarFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes calendarSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 /* Dark theme support */
 .dark-theme {
   .success-content {
@@ -365,6 +579,18 @@
 
   .info-card {
     background: var(--background);
+  }
+
+  .calendar-modal {
+    background: var(--white);
+  }
+
+  .calendar-option {
+    background: var(--background);
+  }
+
+  .apple-logo {
+    color: var(--text-dark);
   }
 }
 
