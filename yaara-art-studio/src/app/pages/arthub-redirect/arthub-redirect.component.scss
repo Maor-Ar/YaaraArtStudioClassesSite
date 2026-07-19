@@ -1,0 +1,170 @@
+.arthub-gate {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(1.5rem, 4vw, 2.75rem);
+  padding: clamp(2rem, 6vw, 4rem) clamp(1.25rem, 5vw, 3rem);
+  overflow: hidden;
+  color: #ffe8ef;
+  background:
+    radial-gradient(ellipse 80% 55% at 15% 10%, rgba(255, 201, 201, 0.18), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 90% 85%, rgba(93, 53, 135, 0.55), transparent 50%),
+    linear-gradient(160deg, #1a0f2e 0%, #241a35 45%, #362947 100%);
+}
+
+.arthub-gate__glow {
+  position: absolute;
+  inset: auto -20% -30% auto;
+  width: min(70vw, 28rem);
+  height: min(70vw, 28rem);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 201, 201, 0.22), transparent 65%);
+  pointer-events: none;
+  animation: arthub-pulse 4.5s ease-in-out infinite;
+}
+
+.arthub-gate__brand,
+.arthub-gate__body,
+.arthub-gate__redirect {
+  position: relative;
+  z-index: 1;
+  max-width: 38rem;
+  margin-inline: auto;
+  width: 100%;
+  text-align: center;
+}
+
+.arthub-gate__studio {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-heading, 'Amatic SC', cursive);
+  font-size: clamp(1.75rem, 5vw, 2.4rem);
+  letter-spacing: 0.08em;
+  color: #ffc9c9;
+  animation: arthub-fade-up 0.7s ease both;
+}
+
+.arthub-gate__title {
+  margin: 0;
+  font-family: var(--font-serif-display, 'Frank Ruhl Libre', serif);
+  font-size: clamp(3rem, 10vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  color: #fff;
+  animation: arthub-fade-up 0.75s ease 0.08s both;
+}
+
+.arthub-gate__tagline {
+  margin: 0.85rem 0 0;
+  font-family: var(--font-ui, 'Heebo', sans-serif);
+  font-size: clamp(1.05rem, 2.8vw, 1.25rem);
+  color: rgba(255, 236, 238, 0.88);
+  animation: arthub-fade-up 0.75s ease 0.14s both;
+}
+
+.arthub-gate__body {
+  font-family: var(--font-ui, 'Heebo', sans-serif);
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: rgba(255, 236, 238, 0.9);
+  text-align: right;
+  animation: arthub-fade-up 0.8s ease 0.2s both;
+
+  p {
+    margin: 0 0 1rem;
+  }
+
+  strong {
+    color: #ffc9c9;
+    font-weight: 700;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0 1.25rem 0 0;
+    list-style: disc;
+  }
+
+  li + li {
+    margin-top: 0.35rem;
+  }
+}
+
+.arthub-gate__redirect {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  animation: arthub-fade-up 0.85s ease 0.28s both;
+}
+
+.arthub-gate__countdown {
+  margin: 0;
+  font-family: var(--font-ui, 'Heebo', sans-serif);
+  font-size: 1rem;
+  color: rgba(255, 201, 201, 0.95);
+}
+
+.arthub-gate__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0.85rem 1.75rem;
+  border-radius: 999px;
+  background: #ffc9c9;
+  color: #241a35;
+  font-family: var(--font-ui, 'Heebo', sans-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.2s ease, background 0.2s ease;
+
+  &:hover {
+    background: #ffe2e8;
+    transform: translateY(-1px);
+  }
+}
+
+.arthub-gate__url {
+  margin: 0;
+  font-family: var(--font-ui, 'Heebo', sans-serif);
+  font-size: 0.9rem;
+
+  a {
+    color: rgba(255, 236, 238, 0.75);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+}
+
+@keyframes arthub-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes arthub-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.06);
+  }
+}
+
+@media (max-width: 640px) {
+  .arthub-gate__body {
+    font-size: 1rem;
+  }
+}

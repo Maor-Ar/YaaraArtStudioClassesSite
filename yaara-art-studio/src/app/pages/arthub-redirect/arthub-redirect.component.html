@@ -1,0 +1,40 @@
+<main class="arthub-gate" dir="rtl" lang="he">
+  <div class="arthub-gate__glow" aria-hidden="true"></div>
+
+  <header class="arthub-gate__brand">
+    <p class="arthub-gate__studio">סטודיו בודה</p>
+    <h1 class="arthub-gate__title">ArtHub</h1>
+    <p class="arthub-gate__tagline">האפליקציה של הסטודיו להרשמה, יומן וניהול שיעורים</p>
+  </header>
+
+  <section class="arthub-gate__body">
+    <p>
+      <strong>ArtHub</strong> הוא המרחב הדיגיטלי של סטודיו בודה — המקום שבו תלמידים ותלמידות
+      נרשמים לשיעורי ציור, עוקבים אחרי היומן האישי שלהם, מנהלים כניסות ומנויים, ומתעדכנים
+      בלוח השיעורים של הסטודיו.
+    </p>
+    <p>
+      דרך ArtHub אפשר לראות אילו שיעורים פתוחים, להירשם בקלות, ולשמור על רצף הלמידה
+      במקום אחד מסודר. האפליקציה חלק מאתר סטודיו בודה, ומיועדת לתלמידי הסטודיו ולמי שממשיך
+      אחרי שיעור הניסיון.
+    </p>
+    <ul>
+      <li>הרשמה לשיעורים ולמעקב אחר מקומות פנויים</li>
+      <li>יומן אישי של השיעורים שלכם</li>
+      <li>ניהול כניסות ומנויים</li>
+      <li>גישה נוחה מהטלפון או מהמחשב</li>
+    </ul>
+  </section>
+
+  <section class="arthub-gate__redirect" aria-live="polite">
+    <p class="arthub-gate__countdown">
+      מעבירים אתכם ל־ArtHub בעוד {{ secondsLeft }} שניות…
+    </p>
+    <a class="arthub-gate__cta" [href]="arthubUrl" (click)="goNow()">
+      כניסה ל־ArtHub עכשיו
+    </a>
+    <p class="arthub-gate__url">
+      <a [href]="arthubUrl">{{ arthubUrl }}</a>
+    </p>
+  </section>
+</main>
