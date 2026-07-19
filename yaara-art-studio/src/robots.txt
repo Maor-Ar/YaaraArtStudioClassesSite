@@ -1,17 +1,10 @@
 User-agent: *
 Allow: /
 
-# Sitemap
-Sitemap: https://yaaraartstudio.com/sitemap.xml
+Sitemap: https://studiobuda.co.il/sitemap.xml
 
-# Crawl-delay
 Crawl-delay: 1
 
-# Disallow admin or private areas (if any in future)
-# Disallow: /admin/
-# Disallow: /private/
-
-# Allow all major search engines
 User-agent: Googlebot
 Allow: /
 
@@ -20,4 +13,3 @@ Allow: /
 
 User-agent: Slurp
 Allow: /
-
