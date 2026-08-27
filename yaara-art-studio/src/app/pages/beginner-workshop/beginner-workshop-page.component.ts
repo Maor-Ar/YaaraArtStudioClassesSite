@@ -44,8 +44,9 @@ export class BeginnerWorkshopPageComponent implements OnInit, AfterViewInit, OnD
   extraDiscountActive = false;
   countdownReady = false;
   countdown: CountdownParts = { days: 0, hours: 0, minutes: 0, seconds: 0 };
+  showStickyCta = false;
   private countdownTimer: ReturnType<typeof setInterval> | null = null;
-  private revealObserver: IntersectionObserver | null = null;
+  private heroObserver: IntersectionObserver | null = null;
   private previousTheme: Theme | null = null;
 
   readonly quotes = [
@@ -129,10 +130,7 @@ export class BeginnerWorkshopPageComponent implements OnInit, AfterViewInit, OnD
   }
 
   ngAfterViewInit(): void {
-    this.setupReveal();
-    if (isPlatformBrowser(this.platformId)) {
-      queueMicrotask(() => this.observePendingReveals());
-    }
+    this.observeHeroForStickyBar();
   }
 
   ngOnDestroy(): void {
@@ -140,8 +138,8 @@ export class BeginnerWorkshopPageComponent implements OnInit, AfterViewInit, OnD
       clearInterval(this.countdownTimer);
       this.countdownTimer = null;
     }
-    this.revealObserver?.disconnect();
-    this.revealObserver = null;
+    this.heroObserver?.disconnect();
+    this.heroObserver = null;
     if (isPlatformBrowser(this.platformId) && this.previousTheme) {
       this.themeService.setTheme(this.previousTheme);
     }
@@ -161,77 +159,21 @@ export class BeginnerWorkshopPageComponent implements OnInit, AfterViewInit, OnD
     document.getElementById('register')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  private setupReveal(): void {
+  private observeHeroForStickyBar(): void {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
-
-    const page = this.host.nativeElement.querySelector('.workshop-page');
-    const nodes = this.host.nativeElement.querySelectorAll<HTMLElement>('[data-reveal]');
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) {
-      nodes.forEach((node) => node.classList.add('is-visible'));
+    const hero = this.host.nativeElement.querySelector('.workshop-hero');
+    if (!hero) {
       return;
     }
-
-    this.revealObserver = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) {
-            continue;
-          }
-          const node = entry.target as HTMLElement;
-          node.classList.add('is-visible');
-          this.animateCounts(node);
-          this.revealObserver?.unobserve(node);
-        }
+    this.heroObserver = new IntersectionObserver(
+      ([entry]) => {
+        this.showStickyCta = !entry.isIntersecting && entry.boundingClientRect.top < 0;
       },
-      { threshold: 0.14, rootMargin: '0px 0px -10% 0px' }
+      { threshold: 0 }
     );
-
-    nodes.forEach((node) => this.revealObserver?.observe(node));
-    page?.classList.add('reveal-ready');
-  }
-
-  private observePendingReveals(): void {
-    if (!this.revealObserver) {
-      return;
-    }
-    this.host.nativeElement
-      .querySelectorAll<HTMLElement>('[data-reveal]:not(.is-visible)')
-      .forEach((node) => this.revealObserver?.observe(node));
-  }
-
-  private animateCounts(scope: HTMLElement): void {
-    const targets = [
-      ...(scope.hasAttribute('data-count') ? [scope] : []),
-      ...Array.from(scope.querySelectorAll<HTMLElement>('[data-count]'))
-    ];
-
-    for (const el of targets) {
-      if (el.dataset['counted'] === '1') {
-        continue;
-      }
-      const target = Number(el.dataset['count']);
-      if (!Number.isFinite(target)) {
-        continue;
-      }
-      el.dataset['counted'] = '1';
-      const useSep = el.dataset['countSep'] === 'true';
-      el.textContent = '0';
-      const duration = Math.min(1400, 700 + target / 4);
-      const start = performance.now();
-      const tick = (now: number) => {
-        const progress = Math.min(1, (now - start) / duration);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const value = Math.round(target * eased);
-        el.textContent = useSep ? value.toLocaleString('en-US') : String(value);
-        if (progress < 1) {
-          requestAnimationFrame(tick);
-        }
-      };
-      requestAnimationFrame(tick);
-    }
+    this.heroObserver.observe(hero);
   }
 
   private isEarlyBirdOfferActive(): boolean {

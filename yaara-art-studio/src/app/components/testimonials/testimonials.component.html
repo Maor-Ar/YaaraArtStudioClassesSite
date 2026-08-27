@@ -1,10 +1,10 @@
 <section id="testimonials" class="testimonials">
   <div class="container">
-    <div class="testimonials-header" data-reveal>
+    <div class="testimonials-header">
       <h2 class="section-title">{{ title }}</h2>
     </div>
 
-    <div class="design-spotlight" data-reveal="scale">
+    <div class="design-spotlight">
       <div class="spotlight-main" [class.is-leaving]="spotlightLeaving">
         <button type="button" class="spot-arrow spot-prev" (click)="prevSpotlight()" aria-label="הקודם">
           ‹
@@ -16,7 +16,7 @@
           </button>
         </figure>
 
-        <button type="button" class="spot-arrow spot-next" (click)="nextSpotlight(true)" aria-label="הבא">
+        <button type="button" class="spot-arrow spot-next" (click)="nextSpotlight()" aria-label="הבא">
           ›
         </button>
       </div>
@@ -27,7 +27,7 @@
           class="thumb"
           *ngFor="let item of testimonials; let i = index; trackBy: trackById"
           [class.active]="activeIndex === i"
-          (click)="selectSpotlight(i, true)"
+          (click)="selectSpotlight(i)"
           [attr.aria-selected]="activeIndex === i"
           role="tab"
         >
@@ -36,7 +36,7 @@
       </div>
     </div>
 
-    <p class="testimonials-closer" *ngIf="subtitle" data-reveal="pop">{{ subtitle }}</p>
+    <p class="testimonials-closer" *ngIf="subtitle">{{ subtitle }}</p>
   </div>
 
   <div

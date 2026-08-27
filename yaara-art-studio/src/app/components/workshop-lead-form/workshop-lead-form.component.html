@@ -1,18 +1,18 @@
 <section class="workshop-form-section" [id]="instanceId">
   <div class="container">
-    <p class="closing-line" *ngIf="closingLine" data-reveal>{{ closingLine }}</p>
+    <p class="closing-line" *ngIf="closingLine">{{ closingLine }}</p>
 
-    <div class="schedule" *ngIf="showSchedule" data-reveal>
+    <div class="schedule" *ngIf="showSchedule">
       <p class="schedule-line">6 מפגשים | ימי חמישי | 10:00-13:00</p>
       <p class="schedule-note">כדי לשריין את מקומך בקורס שמתחיל מיד אחרי החגים</p>
     </div>
 
-    <h2 class="section-title" data-reveal>
+    <h2 class="section-title">
       <span class="title-emoji" aria-hidden="true">📩</span>
       {{ heading }}
     </h2>
 
-    <div class="form-card" *ngIf="!showSuccessMessage" data-reveal="scale">
+    <div class="form-card" *ngIf="!showSuccessMessage">
       <form [formGroup]="leadForm" (ngSubmit)="onSubmit()" novalidate>
         <div class="form-grid">
           <div class="form-group">
@@ -63,7 +63,7 @@
       </form>
     </div>
 
-    <div class="success-card" *ngIf="showSuccessMessage" data-reveal="pop" role="status">
+    <div class="success-card" *ngIf="showSuccessMessage" role="status">
       <h3>קיבלנו את הפרטים!</h3>
       <p>נחזור אליכם בהקדם לבדיקת התאמה לקורס.</p>
     </div>

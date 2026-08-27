@@ -1,5 +1,5 @@
-import { Component, Inject, Input, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 export interface WhatsAppTestimonial {
   id: string;
@@ -16,12 +16,9 @@ export interface WhatsAppTestimonial {
   templateUrl: './testimonials.component.html',
   styleUrl: './testimonials.component.scss',
 })
-export class TestimonialsComponent implements OnInit, OnDestroy {
+export class TestimonialsComponent {
   @Input() title = 'מה אומרים עלינו';
   @Input() subtitle = '';
-  private readonly autoplayMs = 4500;
-  private autoplayTimer: ReturnType<typeof setInterval> | null = null;
-  private resumeTimer: ReturnType<typeof setTimeout> | null = null;
 
   activeIndex = 0;
   spotlightLeaving = false;
@@ -90,20 +87,6 @@ export class TestimonialsComponent implements OnInit, OnDestroy {
     },
   ];
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
-
-  ngOnInit(): void {
-    this.startAutoplay();
-  }
-
-  ngOnDestroy(): void {
-    this.stopAutoplay();
-    if (this.resumeTimer) {
-      clearTimeout(this.resumeTimer);
-      this.resumeTimer = null;
-    }
-  }
-
   get activeTestimonial(): WhatsAppTestimonial {
     return this.testimonials[this.activeIndex];
   }
@@ -112,12 +95,9 @@ export class TestimonialsComponent implements OnInit, OnDestroy {
     return item.ratio < 1;
   }
 
-  selectSpotlight(index: number, fromUser = false): void {
+  selectSpotlight(index: number): void {
     if (index === this.activeIndex || this.spotlightLeaving) {
       return;
-    }
-    if (fromUser) {
-      this.pauseAutoplayTemporarily();
     }
     this.spotlightLeaving = true;
     window.setTimeout(() => {
@@ -126,63 +106,26 @@ export class TestimonialsComponent implements OnInit, OnDestroy {
     }, 200);
   }
 
-  nextSpotlight(fromUser = false): void {
-    this.selectSpotlight((this.activeIndex + 1) % this.testimonials.length, fromUser);
+  nextSpotlight(): void {
+    this.selectSpotlight((this.activeIndex + 1) % this.testimonials.length);
   }
 
   prevSpotlight(): void {
     this.selectSpotlight(
-      (this.activeIndex - 1 + this.testimonials.length) % this.testimonials.length,
-      true
+      (this.activeIndex - 1 + this.testimonials.length) % this.testimonials.length
     );
   }
 
   openLightbox(src: string): void {
-    this.pauseAutoplayTemporarily();
     this.lightboxSrc = src;
   }
 
   closeLightbox(): void {
     this.lightboxSrc = null;
-    this.startAutoplay();
   }
 
   trackById(_: number, item: WhatsAppTestimonial): string {
     return item.id;
-  }
-
-  private startAutoplay(): void {
-    if (!isPlatformBrowser(this.platformId) || this.testimonials.length < 2) {
-      return;
-    }
-    this.stopAutoplay();
-    this.autoplayTimer = setInterval(() => {
-      if (this.lightboxSrc || this.spotlightLeaving) {
-        return;
-      }
-      this.nextSpotlight(false);
-    }, this.autoplayMs);
-  }
-
-  private stopAutoplay(): void {
-    if (this.autoplayTimer) {
-      clearInterval(this.autoplayTimer);
-      this.autoplayTimer = null;
-    }
-  }
-
-  /** Pause while user interacts, then resume after a short delay */
-  private pauseAutoplayTemporarily(): void {
-    this.stopAutoplay();
-    if (this.resumeTimer) {
-      clearTimeout(this.resumeTimer);
-    }
-    this.resumeTimer = setTimeout(() => {
-      this.resumeTimer = null;
-      if (!this.lightboxSrc) {
-        this.startAutoplay();
-      }
-    }, this.autoplayMs * 2);
   }
 
   private asset(filename: string): string {
