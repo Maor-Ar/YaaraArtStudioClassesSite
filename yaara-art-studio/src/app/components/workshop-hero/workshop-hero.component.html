@@ -1,0 +1,48 @@
+<section id="home" class="workshop-hero">
+  <div class="hero-background">
+    <video
+      #heroVideo
+      class="hero-video"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+      webkit-playsinline
+      (error)="onVideoError()">
+      <source src="assets/videos/BG-video1.mp4" type="video/mp4; codecs=avc1.42E01E,mp4a.40.2">
+    </video>
+
+    <div class="hero-static-bg" [style.display]="showStaticBg ? 'block' : 'none'">
+      <div class="hero-bg-gradient"></div>
+    </div>
+
+    <div class="hero-overlay"></div>
+  </div>
+
+  <div class="container">
+    <div class="hero-content">
+      <p class="hero-eyebrow">
+        <span class="title-emoji" aria-hidden="true">🎨</span>
+        ארגז כלים לציור
+      </p>
+      <h1 class="hero-title">
+        הופכים לציירים תוך 6 שבועות!
+        <span class="title-emoji" aria-hidden="true">✨</span>
+      </h1>
+      <p class="hero-subtitle">
+        איך לצייר כל ציור שתרצו בכיף וברוגע — בלי להיות תלויים באף מדריך או מורה
+      </p>
+      <div class="hero-quotes" *ngIf="quotes.length" aria-label="המלצות תלמידים">
+        <blockquote class="hero-quote" *ngFor="let quote of quotes">
+          <span class="quote-mark" aria-hidden="true">”</span>
+          <p>{{ quote }}</p>
+        </blockquote>
+      </div>
+      <a href="#register" class="btn btn-primary hero-cta" (click)="scrollToRegister($event)">
+        לשמירת מקום
+        <span class="title-emoji" aria-hidden="true">✨</span>
+      </a>
+    </div>
+  </div>
+</section>

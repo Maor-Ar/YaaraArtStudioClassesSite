@@ -1,0 +1,41 @@
+<div class="workshop-carousel" dir="rtl">
+  <div class="carousel-stage">
+    <button type="button" class="nav-btn prev" (click)="prev()" aria-label="הציור הקודם">
+      ‹
+    </button>
+
+    <button type="button" class="peek peek-prev" (click)="prev()" aria-label="הציור הקודם">
+      <img [src]="prevArtwork.imageUrl" [alt]="prevArtwork.title || 'ציור מהסטודיו'" />
+    </button>
+
+    <figure class="current-frame">
+      <button type="button" class="current-btn" (click)="openLightbox()">
+        <img [src]="currentArtwork.imageUrl" [alt]="currentArtwork.title || 'ציור מהסטודיו'" />
+      </button>
+    </figure>
+
+    <button type="button" class="peek peek-next" (click)="next(true)" aria-label="הציור הבא">
+      <img [src]="nextArtwork.imageUrl" [alt]="nextArtwork.title || 'ציור מהסטודיו'" />
+    </button>
+
+    <button type="button" class="nav-btn next" (click)="next(true)" aria-label="הציור הבא">
+      ›
+    </button>
+  </div>
+</div>
+
+<div
+  class="lightbox"
+  *ngIf="lightboxOpen"
+  (click)="closeLightbox()"
+  role="dialog"
+  aria-modal="true"
+  aria-label="תצוגה מוגדלת של הציור">
+  <button type="button" class="lightbox-close" (click)="closeLightbox()" aria-label="סגירה">×</button>
+  <button type="button" class="lightbox-nav prev" (click)="$event.stopPropagation(); prev()" aria-label="הקודם">‹</button>
+  <img
+    [src]="currentArtwork.imageUrl"
+    [alt]="currentArtwork.title || 'ציור מהסטודיו'"
+    (click)="$event.stopPropagation()" />
+  <button type="button" class="lightbox-nav next" (click)="$event.stopPropagation(); next(true)" aria-label="הבא">›</button>
+</div>

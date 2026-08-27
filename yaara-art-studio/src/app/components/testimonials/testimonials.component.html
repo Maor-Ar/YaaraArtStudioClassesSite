@@ -1,10 +1,10 @@
 <section id="testimonials" class="testimonials">
   <div class="container">
-    <div class="testimonials-header">
-      <h2 class="section-title">מה אומרים עלינו</h2>
+    <div class="testimonials-header" data-reveal>
+      <h2 class="section-title">{{ title }}</h2>
     </div>
 
-    <div class="design-spotlight">
+    <div class="design-spotlight" data-reveal="scale">
       <div class="spotlight-main" [class.is-leaving]="spotlightLeaving">
         <button type="button" class="spot-arrow spot-prev" (click)="prevSpotlight()" aria-label="הקודם">
           ‹
@@ -35,6 +35,8 @@
         </button>
       </div>
     </div>
+
+    <p class="testimonials-closer" *ngIf="subtitle" data-reveal="pop">{{ subtitle }}</p>
   </div>
 
   <div

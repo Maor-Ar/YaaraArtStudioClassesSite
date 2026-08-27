@@ -3,12 +3,23 @@ import { MainPageComponent } from './pages/main-page/main-page.component';
 import { PaymentPageComponent } from './pages/payment-page/payment-page.component';
 import { PaymentSuccessComponent } from './pages/payment-success/payment-success.component';
 import { ArthubRedirectComponent } from './pages/arthub-redirect/arthub-redirect.component';
+import { BeginnerWorkshopPageComponent } from './pages/beginner-workshop/beginner-workshop-page.component';
 
 export const routes: Routes = [
   {
     path: '',
     component: MainPageComponent,
     title: 'סטודיו בודה - שיעורי ציור חווייתיים'
+  },
+  {
+    path: 'YaaraArtStudioClassesSite',
+    component: MainPageComponent,
+    title: 'סטודיו בודה - שיעורי ציור חווייתיים'
+  },
+  {
+    path: 'BegginerArtistWorkshop',
+    component: BeginnerWorkshopPageComponent,
+    title: 'ארגז כלים לציור | סטודיו בודה'
   },
   {
     path: 'payments',

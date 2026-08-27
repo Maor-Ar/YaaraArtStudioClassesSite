@@ -121,22 +121,12 @@
   padding: 0.35rem 0.25rem 1rem;
   margin-bottom: 0.25rem;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--primary) 40%, transparent) transparent;
+  scrollbar-width: none;
   scroll-padding-inline: 0.35rem;
 
   &::-webkit-scrollbar {
-    height: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    margin-block: 0.15rem;
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--primary) 35%, transparent);
-    border-radius: 999px;
+    display: none;
+    height: 0;
   }
 }
 
@@ -171,6 +161,16 @@
     opacity: 1;
     border-color: var(--primary);
   }
+}
+
+.testimonials-closer {
+  text-align: center;
+  font-family: var(--font-amatic);
+  font-size: clamp(1.6rem, 3.5vw, 2rem);
+  font-weight: 700;
+  color: var(--primary);
+  margin: 1.5rem auto 0;
+  max-width: 36rem;
 }
 
 /* Lightbox */
@@ -239,6 +239,24 @@
   .thumb {
     width: 84px;
     height: 58px;
+  }
+}
+
+:host-context(.workshop-page) .testimonials {
+  background: transparent;
+}
+
+:host-context(.workshop-page) .spotlight-figure {
+  background: color-mix(in srgb, var(--white) 82%, transparent);
+  box-shadow: var(--shadow-light);
+  border: 0;
+}
+
+@media (max-width: 768px) {
+  :host-context(.workshop-page) .testimonials,
+  :host-context(.workshop-page) .testimonials-header,
+  :host-context(.workshop-page) .testimonials-closer {
+    text-align: center;
   }
 }
 

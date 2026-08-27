@@ -2,7 +2,7 @@
 <footer class="footer">
   <div class="container">
     <div class="footer-content">
-      <div class="footer-brand">
+      <div class="footer-brand" data-reveal="start">
         <h3 class="footer-logo">סטודיו בודה</h3>
         <p class="footer-description">
           מכניסים אומנות לחיים.
@@ -46,7 +46,7 @@
         </div>
       </div>
       
-      <div class="footer-links">
+      <div class="footer-links" data-reveal>
         <div class="link-group">
           <h4>ניווט מהיר</h4>
           <ul>
@@ -63,12 +63,13 @@
             <li [hidden]="true"><a href="#testimonials" (click)="scrollToSection('testimonials', $event)">המלצות</a></li>
             <li><a href="#contact" (click)="scrollToSection('contact', $event)">צור קשר</a></li>
             <li><a href="/payments" (click)="navigateToPayments($event)">תשלומים</a></li>
+            <li><a routerLink="/BegginerArtistWorkshop">ארגז כלים לציור</a></li>
             <li><a href="#contact" (click)="scrollToSection('contact', $event)">שיעור ניסיון</a></li>
           </ul>
         </div>
       </div>
       
-      <div class="footer-social">
+      <div class="footer-social" data-reveal="end">
         <h4>עקבו אחרינו</h4>
         <div class="social-links">
           <a href="https://www.instagram.com/buda._studio" 
@@ -118,7 +119,7 @@
       </div>
     </div>
     
-    <div class="footer-bottom">
+    <div class="footer-bottom" data-reveal>
       <div class="footer-copyright">
         <p>כל הזכויות שמורות © Studio Buda 2025</p>
       </div>

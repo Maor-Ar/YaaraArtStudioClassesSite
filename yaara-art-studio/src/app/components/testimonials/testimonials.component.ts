@@ -1,4 +1,4 @@
-import { Component, Inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, Inject, Input, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 export interface WhatsAppTestimonial {
@@ -17,6 +17,8 @@ export interface WhatsAppTestimonial {
   styleUrl: './testimonials.component.scss',
 })
 export class TestimonialsComponent implements OnInit, OnDestroy {
+  @Input() title = 'מה אומרים עלינו';
+  @Input() subtitle = '';
   private readonly autoplayMs = 4500;
   private autoplayTimer: ReturnType<typeof setInterval> | null = null;
   private resumeTimer: ReturnType<typeof setTimeout> | null = null;
