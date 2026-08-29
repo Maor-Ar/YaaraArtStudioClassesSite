@@ -1,12 +1,7 @@
-import { Component, Inject, Input, PLATFORM_ID } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-
-declare global {
-  interface Window {
-    fbq?: (...args: any[]) => void;
-  }
-}
+import { MetaPixelService } from '../../services/meta-pixel.service';
 
 @Component({
   selector: 'app-workshop-lead-form',
@@ -30,7 +25,7 @@ export class WorkshopLeadFormComponent {
 
   constructor(
     private fb: FormBuilder,
-    @Inject(PLATFORM_ID) private platformId: Object
+    private metaPixel: MetaPixelService
   ) {
     this.leadForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.minLength(2)]],
@@ -87,7 +82,10 @@ export class WorkshopLeadFormComponent {
       });
 
       if (response.ok) {
-        this.trackMetaPixelLead();
+        this.metaPixel.trackLead({
+          content_name: 'ארגז כלים לציור',
+          content_category: 'BeginnerArtistWorkshop'
+        });
         this.showSuccessMessage = true;
         this.leadForm.reset();
       } else {
@@ -97,15 +95,6 @@ export class WorkshopLeadFormComponent {
       this.submitError = 'שגיאת רשת. אנא בדקו את החיבור לאינטרנט ונסו שוב.';
     } finally {
       this.isSubmitting = false;
-    }
-  }
-
-  private trackMetaPixelLead(): void {
-    if (!isPlatformBrowser(this.platformId)) {
-      return;
-    }
-    if (typeof window !== 'undefined' && typeof window.fbq === 'function') {
-      window.fbq('track', 'Lead');
     }
   }
 }
