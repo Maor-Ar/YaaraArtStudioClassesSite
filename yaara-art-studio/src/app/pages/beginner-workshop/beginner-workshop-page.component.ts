@@ -39,8 +39,8 @@ function splitAfterQuestions(text: string): string[] {
   styleUrl: './beginner-workshop-page.component.scss'
 })
 export class BeginnerWorkshopPageComponent implements OnInit, AfterViewInit, OnDestroy {
-  /** Offer stays up through 31.8.2026 and hides from 1.9.2026 00:00 Israel time. */
-  readonly extraDiscountUntil = new Date('2026-09-01T00:00:00+03:00');
+  /** Offer stays up through 24.9.2026 and hides from 25.9.2026 00:00 Israel time. */
+  readonly extraDiscountUntil = new Date('2026-09-25T00:00:00+03:00');
   extraDiscountActive = false;
   countdownReady = false;
   countdown: CountdownParts = { days: 0, hours: 0, minutes: 0, seconds: 0 };
