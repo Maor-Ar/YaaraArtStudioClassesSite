@@ -2,11 +2,12 @@ import { Component, Inject, PLATFORM_ID, Input } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { PopupComponent } from '../popup/popup.component';
+import { StudioAddressComponent } from '../studio-address/studio-address.component';
 
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [CommonModule, PopupComponent, RouterLink],
+  imports: [CommonModule, PopupComponent, RouterLink, StudioAddressComponent],
   templateUrl: './footer.component.html',
   styleUrl: './footer.component.scss'
 })

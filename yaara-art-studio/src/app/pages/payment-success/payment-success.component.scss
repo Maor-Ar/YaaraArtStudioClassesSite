@@ -150,6 +150,14 @@
       margin: 0;
       word-break: break-word;
     }
+
+    app-studio-address {
+      display: block;
+      margin-top: 0.15rem;
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
   }
   
   &.highlight-card {

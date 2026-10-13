@@ -1,0 +1,40 @@
+<div class="studio-address">
+  <p class="studio-address-text">
+    <ng-container *ngFor="let line of addressLines; let last = last">
+      {{ line }}<br *ngIf="!last" />
+    </ng-container>
+  </p>
+  <button
+    type="button"
+    class="map-btn"
+    (click)="openMap()"
+    [attr.aria-expanded]="mapOpen"
+    aria-haspopup="dialog"
+  >
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/>
+    </svg>
+    מפת המקום
+  </button>
+</div>
+
+<div
+  class="map-overlay"
+  *ngIf="mapOpen"
+  #mapOverlay
+  (click)="onOverlayClick($event)"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="studio-map-title"
+>
+  <div class="map-dialog" (click)="$event.stopPropagation()">
+    <button type="button" class="map-close" (click)="closeMap()" aria-label="סגירה">
+      ×
+    </button>
+    <h2 id="studio-map-title" class="map-title">מפת המקום</h2>
+    <p class="map-subtitle">חניה, כניסה ומתחם חאן בבא</p>
+    <div class="map-frame">
+      <img [src]="mapSrc" alt="מפת הסטודיו בתע״ש 14 כפר סבא, כולל חניה ומתחם חאן בבא" />
+    </div>
+  </div>
+</div>

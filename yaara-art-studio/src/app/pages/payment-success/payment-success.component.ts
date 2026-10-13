@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { HeaderComponent } from '../../components/header/header.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { ArthubEventsService } from '../../services/arthub-events.service';
+import { StudioAddressComponent } from '../../components/studio-address/studio-address.component';
+import { STUDIO_ADDRESS } from '../../data/studio-location';
 
 declare global {
   interface Window {
@@ -14,7 +16,7 @@ declare global {
 @Component({
   selector: 'app-payment-success',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, FooterComponent, DatePipe],
+  imports: [CommonModule, HeaderComponent, FooterComponent, DatePipe, StudioAddressComponent],
   templateUrl: './payment-success.component.html',
   styleUrl: './payment-success.component.scss'
 })
@@ -310,7 +312,7 @@ export class PaymentSuccessComponent implements OnInit {
 
     const name = this.fullName || 'שיעור ניסיון';
     const title = `שיעור ניסיון - סטודיו בודה: ${name}`;
-    const location = 'תל חי 39 כפר סבא, קומה 1';
+    const location = STUDIO_ADDRESS;
     let description = 'שיעור ניסיון בסטודיו בודה';
     if (this.classTitle) {
       description += `\nשיעור: ${this.classTitle}`;
