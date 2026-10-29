@@ -9,8 +9,8 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
   styleUrl: './payment.component.scss'
 })
 export class PaymentComponent implements OnInit {
-  // Grow-il payment link
-  private readonly growIlPaymentLink = 'https://pay.grow.link/a1e37051ec261a8b40b39a49a6351aa9-MjY4NDY4MQ';
+  private readonly hypPaymentLink =
+    'https://stage.hyp.co.il/sp/?key=cfd7757d-b482-4d5c-b840-2398bce254ec&id=13443';
   
   // Form data from localStorage
   fullName: string = '';
@@ -52,7 +52,7 @@ export class PaymentComponent implements OnInit {
   }
 
   /**
-   * Redirect to Grow-il payment page
+   * Redirect to Hyp payment page
    */
   proceedToPayment(): void {
     if (!isPlatformBrowser(this.platformId)) {
@@ -69,11 +69,7 @@ export class PaymentComponent implements OnInit {
     localStorage.setItem('paymentCustomerName', this.fullName);
     localStorage.setItem('paymentDateTime', nowIso);
 
-    // Set redirecting state
     this.isRedirecting = true;
-
-    // Redirect to Grow-il payment page
-    // The user will be redirected back to /payment-success after payment
-    window.location.href = this.growIlPaymentLink;
+    window.location.href = this.hypPaymentLink;
   }
 }

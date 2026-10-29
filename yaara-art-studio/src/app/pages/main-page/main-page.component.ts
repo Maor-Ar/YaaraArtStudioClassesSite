@@ -53,7 +53,7 @@ export class MainPageComponent implements OnInit {
   toggleWhatsAppOptions(): void {
     // If view mode is set, navigate directly instead of showing options
     if (this.viewMode === 'adult') {
-      window.open('https://wa.me/972556646033', '_blank', 'noopener,noreferrer');
+      window.open('https://wa.me/972554650037', '_blank', 'noopener,noreferrer');
       return;
     } else if (this.viewMode === 'child') {
       window.open('https://wa.me/972549539515', '_blank', 'noopener,noreferrer');
@@ -65,7 +65,7 @@ export class MainPageComponent implements OnInit {
 
   getWhatsAppUrl(): string {
     if (this.viewMode === 'adult') {
-      return 'https://wa.me/972556646033';
+      return 'https://wa.me/972554650037';
     } else if (this.viewMode === 'child') {
       return 'https://wa.me/972549539515';
     }
