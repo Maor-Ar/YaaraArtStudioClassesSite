@@ -1,0 +1,42 @@
+<section class="course-promo" *ngIf="!courseStarted" aria-label="קורס מתחילים הבא">
+  <div class="promo-stroke" aria-hidden="true"></div>
+  <div class="container promo-row">
+    <div class="promo-lead">
+      <p class="promo-kicker">המחזור הבא</p>
+      <p class="promo-title">קורס מתחילים נפתח ב־17.12</p>
+      <p class="promo-meta">ימי חמישי · 10:00–13:00 · כפר סבא</p>
+    </div>
+
+    <div class="countdown" dir="ltr" *ngIf="countdownReady" aria-label="ספירה לאחור לפתיחת הקורס">
+      <div class="count-unit">
+        <strong>{{ countdown.days }}</strong>
+        <span>ימים</span>
+      </div>
+      <div class="count-unit">
+        <strong>{{ countdown.hours }}</strong>
+        <span>שעות</span>
+      </div>
+      <div class="count-unit">
+        <strong>{{ countdown.minutes }}</strong>
+        <span>דקות</span>
+      </div>
+      <div class="count-unit">
+        <strong>{{ countdown.seconds }}</strong>
+        <span>שניות</span>
+      </div>
+    </div>
+
+    <div class="promo-offer">
+      <p class="price-label">מחיר מבצע</p>
+      <p class="price-row">
+        <span class="old-price">
+          <span class="old-value">{{ originalPrice }}</span>
+          <span class="slash" aria-hidden="true"></span>
+        </span>
+        <span class="sale-price">{{ salePrice }}</span>
+      </p>
+    </div>
+
+    <a routerLink="/BegginerArtistWorkshop" class="promo-cta">לפרטים</a>
+  </div>
+</section>

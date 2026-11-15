@@ -11,6 +11,7 @@ import { ClassesAlternatingComponent } from '../../components/classes-alternatin
 import { TestimonialsComponent } from '../../components/testimonials/testimonials.component';
 import { FormComponent } from '../../components/form/form.component';
 import { TeachersComponent } from '../../components/teachers/teachers.component';
+import { CoursePromoBannerComponent } from '../../components/course-promo-banner/course-promo-banner.component';
 
 @Component({
   selector: 'app-main-page',
@@ -26,7 +27,8 @@ import { TeachersComponent } from '../../components/teachers/teachers.component'
     ClassesAlternatingComponent,
     TestimonialsComponent,
     FormComponent,
-    TeachersComponent
+    TeachersComponent,
+    CoursePromoBannerComponent
   ],
   templateUrl: './main-page.component.html',
   styleUrl: './main-page.component.scss'
