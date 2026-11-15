@@ -38,6 +38,37 @@ function toUtcMidnight(date) {
   return d;
 }
 
+function reservedRegularIds(source) {
+  const raw = Array.isArray(source) ? source : source?.reservedRegularUserIds;
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((id) => typeof id === 'string' && id.length > 0);
+}
+
+function evaluateTrialCapacity({
+  dropInCount = 0,
+  reservedRegularUserIds,
+  maxRegistrations,
+  overrideMaxRegistrations,
+  isCancelled = false,
+}) {
+  const dropIns = Number(dropInCount) > 0 ? Number(dropInCount) : 0;
+  const regulars = reservedRegularIds(reservedRegularUserIds).length;
+  const occupied = dropIns + regulars;
+  const overrideMax = Number(overrideMaxRegistrations);
+  const seriesMax = Number(maxRegistrations);
+  const max =
+    Number.isFinite(overrideMax) && overrideMax > 0
+      ? overrideMax
+      : Number.isFinite(seriesMax) && seriesMax > 0
+        ? seriesMax
+        : 6;
+  if (isCancelled) {
+    return { ok: false, available: 0, occupied, max, regulars, dropIns };
+  }
+  const available = max - occupied;
+  return { ok: occupied < max, available, occupied, max, regulars, dropIns };
+}
+
 function expandOccurrences(event, startDate, endDate) {
   const results = [];
   if (event.isRecurring && event.recurringIntervalDays) {
@@ -100,6 +131,7 @@ async function main() {
         title: event.title,
         startTime: event.startTime,
         maxRegistrations: Number(event.maxRegistrations) || 6,
+        reservedRegularUserIds: event.reservedRegularUserIds,
         ...occ,
       });
     }
@@ -128,19 +160,47 @@ async function main() {
 
   const open = [];
   for (const occ of occurrences) {
-    const cancelId = `${occ.baseEventId}_${occ.occurrenceDateKey}`;
-    const cancelSnap = await getDoc(doc(db, 'event_cancellations', cancelId));
-    if (cancelSnap.exists() && cancelSnap.data()?.isActive !== false) continue;
-    const registered = counts[`${occ.baseEventId}:${occ.occurrenceDateKey}`] || 0;
-    const spots = occ.maxRegistrations - registered;
-    if (spots > 0) {
-      open.push({ ...occ, availableSpots: spots });
+    const overrideId = `${occ.baseEventId}_${occ.occurrenceDateKey}`;
+    let isCancelled = false;
+    let overrideMax;
+    try {
+      const overrideSnap = await getDoc(doc(db, 'event_occurrence_overrides', overrideId));
+      if (overrideSnap.exists()) {
+        const data = overrideSnap.data() || {};
+        isCancelled = data.isCancelled === true;
+        const max = Number(data.overrides?.maxRegistrations);
+        if (Number.isFinite(max) && max > 0) overrideMax = max;
+      } else {
+        const cancelSnap = await getDoc(doc(db, 'event_cancellations', overrideId));
+        if (cancelSnap.exists() && cancelSnap.data()?.isActive !== false) isCancelled = true;
+      }
+    } catch {
+      const cancelSnap = await getDoc(doc(db, 'event_cancellations', overrideId));
+      if (cancelSnap.exists() && cancelSnap.data()?.isActive !== false) isCancelled = true;
+    }
+    const dropIns = counts[`${occ.baseEventId}:${occ.occurrenceDateKey}`] || 0;
+    const decision = evaluateTrialCapacity({
+      dropInCount: dropIns,
+      reservedRegularUserIds: occ.reservedRegularUserIds,
+      maxRegistrations: occ.maxRegistrations,
+      overrideMaxRegistrations: overrideMax,
+      isCancelled,
+    });
+    if (decision.ok && decision.available > 0) {
+      open.push({
+        ...occ,
+        availableSpots: decision.available,
+        regulars: decision.regulars,
+        dropIns: decision.dropIns,
+      });
     }
   }
 
   console.log(`✅ Open adult occurrences: ${open.length}`);
   open.slice(0, 12).forEach((o) => {
-    console.log(`   ${o.occurrenceDateKey} ${o.startTime} ${o.title} (${o.availableSpots} spots) [${o.baseEventId}]`);
+    console.log(
+      `   ${o.occurrenceDateKey} ${o.startTime} ${o.title} (${o.availableSpots} spots, ${o.dropIns} drop-ins + ${o.regulars} regulars) [${o.baseEventId}]`
+    );
   });
 
   if (DO_WRITE && open.length > 0) {

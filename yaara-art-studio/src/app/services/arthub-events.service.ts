@@ -6,13 +6,17 @@ import {
   getDocs,
   query,
   where,
-  addDoc,
   setDoc,
-  increment,
   Timestamp,
   DocumentData,
+  runTransaction,
 } from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
+import {
+  evaluateTrialCapacity,
+  resolveDropInCount,
+  resolveSeriesId,
+} from './adult-class-capacity';
 
 export interface AdultClassOccurrence {
   /** Virtual id: baseEventId_YYYY-MM-DD */
@@ -37,6 +41,13 @@ export interface ReserveTrialSpotInput {
 const CONFIRMED = 'confirmed';
 const TRIAL_NAME_SUFFIX = 'אוטומטי שיעור נסיון';
 const OCCURRENCE_COUNTS_COLLECTION = 'occurrence_counts';
+const OCCURRENCE_OVERRIDES_COLLECTION = 'event_occurrence_overrides';
+const LEGACY_CANCELLATIONS_COLLECTION = 'event_cancellations';
+
+type OccurrenceOverrideInfo = {
+  isCancelled: boolean;
+  maxRegistrations?: number;
+};
 
 @Injectable({
   providedIn: 'root',
@@ -75,6 +86,7 @@ export class ArthubEventsService {
       startTime: string;
       duration: number;
       maxRegistrations: number;
+      reservedRegularUserIds: unknown;
     }> = [];
 
     for (const event of adultEvents) {
@@ -91,6 +103,7 @@ export class ArthubEventsService {
           startTime: String(event['startTime'] || ''),
           duration: Number(event['duration']) || 90,
           maxRegistrations: Number(event['maxRegistrations']) || 6,
+          reservedRegularUserIds: event['reservedRegularUserIds'],
         });
       }
     }
@@ -100,29 +113,34 @@ export class ArthubEventsService {
     }
 
     const eventIds = [...new Set(occurrences.map((o) => o.baseEventId))];
-    const [scannedCounts, counterCounts, cancellations] = await Promise.all([
+    const occurrenceKeys = occurrences.map((o) => ({
+      eventId: o.baseEventId,
+      dateKey: o.occurrenceDateKey,
+    }));
+    const [scannedCounts, counterCounts, overrides] = await Promise.all([
       this.countConfirmedByEventAndDate(eventIds),
-      this.loadOccurrenceCounts(
-        occurrences.map((o) => ({ eventId: o.baseEventId, dateKey: o.occurrenceDateKey }))
-      ),
-      this.loadCancellations(eventIds, occurrences.map((o) => o.occurrenceDateKey)),
+      this.loadOccurrenceCounts(occurrenceKeys),
+      this.loadOccurrenceOverrides(occurrenceKeys),
     ]);
 
     const available: AdultClassOccurrence[] = [];
 
     for (const occ of occurrences) {
-      const cancelKey = `${occ.baseEventId}_${occ.occurrenceDateKey}`;
-      if (cancellations.has(cancelKey)) {
-        continue;
-      }
-
+      const overrideKey = `${occ.baseEventId}_${occ.occurrenceDateKey}`;
+      const override = overrides.get(overrideKey);
       const countKey = `${occ.baseEventId}:${occ.occurrenceDateKey}`;
-      const registeredCount = this.resolveRegisteredCount(
+      const dropIns = resolveDropInCount(
         counterCounts.get(countKey),
         scannedCounts[countKey] || 0
       );
-      const availableSpots = occ.maxRegistrations - registeredCount;
-      if (availableSpots <= 0) {
+      const decision = evaluateTrialCapacity({
+        dropInCount: dropIns,
+        reservedRegularUserIds: occ.reservedRegularUserIds,
+        maxRegistrations: occ.maxRegistrations,
+        overrideMaxRegistrations: override?.maxRegistrations,
+        isCancelled: override?.isCancelled === true,
+      });
+      if (!decision.ok || decision.available <= 0) {
         continue;
       }
 
@@ -140,8 +158,8 @@ export class ArthubEventsService {
         duration: occ.duration,
         timeLabel,
         displayLabel: `${hebrewDate} ${timeLabel} · ${shortTitle}`,
-        availableSpots,
-        maxRegistrations: occ.maxRegistrations,
+        availableSpots: decision.available,
+        maxRegistrations: decision.max,
       });
     }
 
@@ -160,18 +178,19 @@ export class ArthubEventsService {
       throw new Error('Firestore is not available in this environment');
     }
 
-    const eventId = String(input.eventId || '').trim();
+    const seriesId = resolveSeriesId(String(input.eventId || '').trim());
     const occurrenceDateKey = String(input.occurrenceDateKey || '').trim();
     const customerName = String(input.customerName || '').trim();
 
-    if (!eventId || !/^\d{4}-\d{2}-\d{2}$/.test(occurrenceDateKey)) {
+    if (!seriesId || !/^\d{4}-\d{2}-\d{2}$/.test(occurrenceDateKey)) {
       throw new Error('Invalid event or occurrence date');
     }
     if (!customerName || !customerName.includes(TRIAL_NAME_SUFFIX)) {
       throw new Error('Customer name must include trial reservation suffix');
     }
 
-    const eventSnap = await getDoc(doc(db, 'events', eventId));
+    const eventRef = doc(db, 'events', seriesId);
+    const eventSnap = await getDoc(eventRef);
     if (!eventSnap.exists() || eventSnap.data()?.['isActive'] !== true) {
       throw new Error('Event is not active');
     }
@@ -182,66 +201,94 @@ export class ArthubEventsService {
       throw new Error('Cannot reserve a class that has already ended');
     }
 
-    const cancelSnap = await getDoc(doc(db, 'event_cancellations', `${eventId}_${occurrenceDateKey}`));
-    if (cancelSnap.exists() && cancelSnap.data()?.['isActive'] !== false) {
+    const override = await this.loadOccurrenceOverride(seriesId, occurrenceDateKey);
+    if (override.isCancelled) {
       throw new Error('This class occurrence is cancelled');
     }
 
-    const countRef = doc(db, OCCURRENCE_COUNTS_COLLECTION, `${eventId}_${occurrenceDateKey}`);
-    let counterCount: number | null = null;
+    const countRef = doc(db, OCCURRENCE_COUNTS_COLLECTION, `${seriesId}_${occurrenceDateKey}`);
     let scannedCount = 0;
     try {
       const [countSnap, scannedCounts] = await Promise.all([
         getDoc(countRef),
-        this.countConfirmedByEventAndDate([eventId]),
+        this.countConfirmedByEventAndDate([seriesId]),
       ]);
-      scannedCount = scannedCounts[`${eventId}:${occurrenceDateKey}`] || 0;
-      counterCount = countSnap.exists() ? Number(countSnap.data()?.['count']) || 0 : null;
+      scannedCount = scannedCounts[`${seriesId}:${occurrenceDateKey}`] || 0;
+      if (!countSnap.exists()) {
+        await this.seedOccurrenceCount(seriesId, occurrenceDateKey, scannedCount);
+      }
     } catch (error) {
       console.warn('⚠️ [ArthubEvents] Counter read failed, using registration scan only:', error);
-      const scannedCounts = await this.countConfirmedByEventAndDate([eventId]);
-      scannedCount = scannedCounts[`${eventId}:${occurrenceDateKey}`] || 0;
-    }
-    const registeredCount = this.resolveRegisteredCount(counterCount, scannedCount);
-    const maxRegistrations = Number(event['maxRegistrations']) || 6;
-    if (registeredCount >= maxRegistrations) {
-      throw new Error('Event is at full capacity');
+      const scannedCounts = await this.countConfirmedByEventAndDate([seriesId]);
+      scannedCount = scannedCounts[`${seriesId}:${occurrenceDateKey}`] || 0;
     }
 
     const now = new Date();
     const nowTs = Timestamp.fromDate(now);
     const occurrenceTs = Timestamp.fromDate(occurrenceDate);
-    const docRef = await addDoc(collection(db, 'event_manual_registrations'), {
-      customerName,
-      eventId,
-      occurrenceDate: occurrenceTs,
-      date: occurrenceTs,
-      dateKey: occurrenceDateKey,
-      status: CONFIRMED,
-      source: 'trial_site',
-      createdAt: nowTs,
-      updatedAt: nowTs,
-    });
+    const registrationRef = doc(collection(db, 'event_manual_registrations'));
 
-    // Keep ArtHub capacity counter in sync (same collection the app checks).
     try {
-      await this.bumpOccurrenceCount({
-        eventId,
-        dateKey: occurrenceDateKey,
-        previousCounter: counterCount,
-        previousScan: scannedCount,
+      await runTransaction(db, async (transaction) => {
+        const liveEventSnap = await transaction.get(eventRef);
+        const liveCountSnap = await transaction.get(countRef);
+
+        if (!liveEventSnap.exists() || liveEventSnap.data()?.['isActive'] !== true) {
+          throw new Error('Event is not active');
+        }
+
+        const liveEvent = liveEventSnap.data()!;
+        const counterCount = liveCountSnap.exists()
+          ? Number(liveCountSnap.data()?.['count'])
+          : null;
+        const dropIns = resolveDropInCount(counterCount, scannedCount);
+        const decision = evaluateTrialCapacity({
+          dropInCount: dropIns,
+          reservedRegularUserIds: liveEvent['reservedRegularUserIds'],
+          maxRegistrations: liveEvent['maxRegistrations'],
+          overrideMaxRegistrations: override.maxRegistrations,
+        });
+
+        if (!decision.ok) {
+          throw new Error('Event is at full capacity');
+        }
+
+        transaction.set(registrationRef, {
+          customerName,
+          eventId: seriesId,
+          occurrenceDate: occurrenceTs,
+          date: occurrenceTs,
+          dateKey: occurrenceDateKey,
+          status: CONFIRMED,
+          source: 'trial_site',
+          createdAt: nowTs,
+          updatedAt: nowTs,
+        });
+        transaction.set(
+          countRef,
+          {
+            eventId: seriesId,
+            dateKey: occurrenceDateKey,
+            count: dropIns + 1,
+            updatedAt: nowTs,
+          },
+          { merge: true }
+        );
       });
     } catch (error) {
-      console.error(
-        '❌ [ArthubEvents] Reserved manually but failed to bump occurrence_counts. Deploy updated firestore.rules.',
-        error
-      );
-      throw new Error(
-        'Registration saved but capacity counter update failed. Deploy ArtHub firestore.rules, then re-check this class.'
-      );
+      const message = error instanceof Error ? error.message : String(error);
+      if (
+        message === 'Event is at full capacity' ||
+        message === 'Event is not active' ||
+        message === 'This class occurrence is cancelled'
+      ) {
+        throw error;
+      }
+      console.error('❌ [ArthubEvents] Trial reservation transaction failed:', error);
+      throw error;
     }
 
-    return docRef.id;
+    return registrationRef.id;
   }
 
   buildTrialCustomerName(firstName: string, lastName: string): string {
@@ -258,67 +305,26 @@ export class ArthubEventsService {
     return true;
   }
 
-  /**
-   * Prefer the higher of counter vs registration scan so a stale-low counter
-   * (from older trial bookings) cannot hide a full class.
-   */
-  private resolveRegisteredCount(counterCount: number | null | undefined, scannedCount: number): number {
-    if (counterCount == null || Number.isNaN(counterCount)) {
-      return scannedCount;
-    }
-    return Math.max(counterCount, scannedCount);
-  }
-
-  private async bumpOccurrenceCount(input: {
-    eventId: string;
-    dateKey: string;
-    previousCounter: number | null;
-    previousScan: number;
-  }): Promise<void> {
+  private async seedOccurrenceCount(
+    eventId: string,
+    dateKey: string,
+    scannedCount: number
+  ): Promise<void> {
     const db = this.firebaseService.getFirestore();
     if (!db) {
       return;
     }
 
-    const { eventId, dateKey, previousCounter, previousScan } = input;
-    const countRef = doc(db, OCCURRENCE_COUNTS_COLLECTION, `${eventId}_${dateKey}`);
-    const updatedAt = Timestamp.fromDate(new Date());
-
-    if (previousCounter == null) {
-      // Counter missing: seed to true total after this reservation (scan + 1).
-      await setDoc(countRef, {
+    try {
+      await setDoc(doc(db, OCCURRENCE_COUNTS_COLLECTION, `${eventId}_${dateKey}`), {
         eventId,
         dateKey,
-        count: previousScan + 1,
-        updatedAt,
+        count: scannedCount,
+        updatedAt: Timestamp.fromDate(new Date()),
       });
-      return;
+    } catch (error) {
+      console.warn('⚠️ [ArthubEvents] Could not seed occurrence_counts before reservation:', error);
     }
-
-    if (previousCounter < previousScan) {
-      // Heal stale-low counter, then reflect this new registration.
-      await setDoc(countRef, {
-        eventId,
-        dateKey,
-        count: previousScan + 1,
-        updatedAt,
-      });
-      return;
-    }
-
-    // Normal path: atomic +1 (matches ArtHub adjustOccurrenceCount).
-    // Use set+merge with increment; rules allow update only as count+1.
-    // If the doc was created since our read, increment still works.
-    await setDoc(
-      countRef,
-      {
-        eventId,
-        dateKey,
-        count: increment(1),
-        updatedAt,
-      },
-      { merge: true }
-    );
   }
 
   private expandOccurrences(
@@ -457,31 +463,62 @@ export class ArthubEventsService {
     return result;
   }
 
-  private async loadCancellations(
-    eventIds: string[],
-    dateKeys: string[]
-  ): Promise<Set<string>> {
-    const db = this.firebaseService.getFirestore();
-    const cancelled = new Set<string>();
-    if (!db) {
-      return cancelled;
-    }
-
-    const uniqueDateKeys = [...new Set(dateKeys)];
-    const docIds = eventIds.flatMap((eventId) =>
-      uniqueDateKeys.map((dateKey) => `${eventId}_${dateKey}`)
-    );
-
+  private async loadOccurrenceOverrides(
+    keys: Array<{ eventId: string; dateKey: string }>
+  ): Promise<Map<string, OccurrenceOverrideInfo>> {
+    const result = new Map<string, OccurrenceOverrideInfo>();
+    const uniqueKeys = [
+      ...new Map(keys.map((key) => [`${key.eventId}_${key.dateKey}`, key])).values(),
+    ];
     await Promise.all(
-      docIds.map(async (docId) => {
-        const snap = await getDoc(doc(db, 'event_cancellations', docId));
-        if (snap.exists() && snap.data()?.['isActive'] !== false) {
-          cancelled.add(docId);
-        }
+      uniqueKeys.map(async ({ eventId, dateKey }) => {
+        result.set(
+          `${eventId}_${dateKey}`,
+          await this.loadOccurrenceOverride(eventId, dateKey)
+        );
       })
     );
+    return result;
+  }
 
-    return cancelled;
+  private async loadOccurrenceOverride(
+    eventId: string,
+    dateKey: string
+  ): Promise<OccurrenceOverrideInfo> {
+    const db = this.firebaseService.getFirestore();
+    if (!db) {
+      return { isCancelled: false };
+    }
+
+    const seriesId = resolveSeriesId(eventId);
+    const overrideId = `${seriesId}_${dateKey}`;
+
+    try {
+      const overrideSnap = await getDoc(doc(db, OCCURRENCE_OVERRIDES_COLLECTION, overrideId));
+      if (overrideSnap.exists()) {
+        const data = overrideSnap.data() || {};
+        const overrides = (data['overrides'] || {}) as Record<string, unknown>;
+        const overrideMax = Number(overrides['maxRegistrations']);
+        return {
+          isCancelled: data['isCancelled'] === true,
+          maxRegistrations:
+            Number.isFinite(overrideMax) && overrideMax > 0 ? overrideMax : undefined,
+        };
+      }
+    } catch (error) {
+      console.warn('⚠️ [ArthubEvents] Could not read event_occurrence_overrides:', error);
+    }
+
+    try {
+      const cancelSnap = await getDoc(doc(db, LEGACY_CANCELLATIONS_COLLECTION, overrideId));
+      if (cancelSnap.exists() && cancelSnap.data()?.['isActive'] !== false) {
+        return { isCancelled: true };
+      }
+    } catch (error) {
+      console.warn('⚠️ [ArthubEvents] Could not read event_cancellations:', error);
+    }
+
+    return { isCancelled: false };
   }
 
   private hasOccurrenceEnded(
