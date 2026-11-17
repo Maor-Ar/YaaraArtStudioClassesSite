@@ -19,8 +19,13 @@ interface CountdownParts {
 export class CoursePromoBannerComponent implements OnInit, OnDestroy {
   /** Next beginner course opens Thursday 17.12.2026 at 10:00 Israel time. */
   readonly courseStartsAt = new Date('2026-12-17T10:00:00+02:00');
-  readonly originalPrice = '3,200₪';
-  readonly salePrice = '1,800₪';
+  /** Extra 100₪ off stays through 30.11.2026 and hides from 1.12.2026 00:00 Israel time. */
+  readonly saleEndsAt = new Date('2026-12-01T00:00:00+02:00');
+  readonly listPrice = '3,200₪';
+  readonly launchPrice = '1,800₪';
+  readonly earlyPrice = '1,700₪';
+
+  extraDiscountActive = Date.now() < this.saleEndsAt.getTime();
 
   courseStarted = false;
   countdownReady = false;
@@ -31,6 +36,7 @@ export class CoursePromoBannerComponent implements OnInit, OnDestroy {
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
 
   ngOnInit(): void {
+    this.extraDiscountActive = Date.now() < this.saleEndsAt.getTime();
     this.courseStarted = Date.now() >= this.courseStartsAt.getTime();
     if (!isPlatformBrowser(this.platformId) || this.courseStarted) {
       return;
@@ -47,7 +53,20 @@ export class CoursePromoBannerComponent implements OnInit, OnDestroy {
     }
   }
 
+  get originalPrice(): string {
+    return this.extraDiscountActive ? this.launchPrice : this.listPrice;
+  }
+
+  get salePrice(): string {
+    return this.extraDiscountActive ? this.earlyPrice : this.launchPrice;
+  }
+
+  get priceLabel(): string {
+    return this.extraDiscountActive ? 'הנחה של 100₪ עד ה-30.11' : 'מחיר מבצע';
+  }
+
   private tick(): void {
+    this.extraDiscountActive = Date.now() < this.saleEndsAt.getTime();
     const remaining = this.courseStartsAt.getTime() - Date.now();
     if (remaining <= 0) {
       this.courseStarted = true;

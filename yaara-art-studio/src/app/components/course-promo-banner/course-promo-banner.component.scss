@@ -110,10 +110,12 @@
 }
 
 .price-label {
+  max-width: 11rem;
   color: #ffc9c9;
   font-family: var(--font-ui);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 700;
+  line-height: 1.25;
 }
 
 .price-row {

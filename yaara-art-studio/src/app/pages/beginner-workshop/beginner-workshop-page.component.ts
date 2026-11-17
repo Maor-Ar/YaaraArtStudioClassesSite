@@ -39,9 +39,9 @@ function splitAfterQuestions(text: string): string[] {
   styleUrl: './beginner-workshop-page.component.scss'
 })
 export class BeginnerWorkshopPageComponent implements OnInit, AfterViewInit, OnDestroy {
-  /** Offer stays up through 24.9.2026 and hides from 25.9.2026 00:00 Israel time. */
-  readonly extraDiscountUntil = new Date('2026-09-25T00:00:00+03:00');
-  extraDiscountActive = false;
+  /** Extra 100₪ off stays through 30.11.2026 and hides from 1.12.2026 00:00 Israel time. */
+  readonly extraDiscountUntil = new Date('2026-12-01T00:00:00+02:00');
+  extraDiscountActive = Date.now() < this.extraDiscountUntil.getTime();
   countdownReady = false;
   countdown: CountdownParts = { days: 0, hours: 0, minutes: 0, seconds: 0 };
   showStickyCta = false;
@@ -146,7 +146,7 @@ export class BeginnerWorkshopPageComponent implements OnInit, AfterViewInit, OnD
   }
 
   get displayPrice(): number {
-    return 1800;
+    return this.extraDiscountActive ? 1700 : 1800;
   }
 
   scrollToRegister(event?: Event): void {
