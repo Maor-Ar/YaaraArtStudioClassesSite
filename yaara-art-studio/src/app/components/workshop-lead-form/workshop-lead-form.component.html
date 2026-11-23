@@ -3,8 +3,8 @@
     <p class="closing-line" *ngIf="closingLine">{{ closingLine }}</p>
 
     <div class="schedule" *ngIf="showSchedule">
-      <p class="schedule-line">6 מפגשים | ימי חמישי | 10:00-13:00</p>
-      <p class="schedule-note">כדי לשריין את מקומך בקורס שמתחיל ב-17.12</p>
+      <p class="schedule-line">6 מפגשים | ימי חמישי או שישי | 10:00-13:00</p>
+      <p class="schedule-note">כדי לשריין את מקומך בקורס שמתחיל ב-17/18.12</p>
     </div>
 
     <h2 class="section-title">
@@ -57,7 +57,7 @@
         <p class="submit-error" *ngIf="submitError" role="alert">{{ submitError }}</p>
 
         <button type="submit" class="btn btn-primary submit-btn" [disabled]="isSubmitting">
-          {{ isSubmitting ? 'שולחים...' : 'אני רוצה להרשם!' }}
+          {{ isSubmitting ? 'שולחים...' : 'תחזרו אליי' }}
           <span class="title-emoji" aria-hidden="true" *ngIf="!isSubmitting">✨</span>
         </button>
       </form>

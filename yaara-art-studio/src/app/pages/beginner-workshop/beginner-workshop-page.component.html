@@ -5,7 +5,7 @@
       <div class="nav-actions">
         <a routerLink="/" class="studio-link">לשיעורי הסטודיו</a>
         <a href="#register" class="btn btn-primary header-cta" (click)="scrollToRegister($event)">
-          לשמירת מקום
+          להשארת פרטים
           <span class="title-emoji" aria-hidden="true">✨</span>
         </a>
       </div>
@@ -55,7 +55,7 @@
         <p class="course-kicker">אחרי שנים של ניסיון בציור והמון המון תלמידים</p>
         <p class="course-lead">יש לנו שיטה שעובדת ב-100% — והיא שלכם בקורס קצר וממוקד שמכיל את כל מה שצריך!</p>
         <p>קורס פרונטלי בכפר סבא של 6 מפגשים, שילמד אתכם צעד-אחר-צעד איך לגשת לכל ציור שתרצו לצייר — בלי להסתבך!</p>
-        <p class="highlight">מתחיל ב-17.12, ימי חמישי בבוקר 10:00-13:00</p>
+        <p class="highlight">מתחיל ב-17/18.12, ימי חמישי או שישי בבוקר 10:00-13:00</p>
       </div>
       <figure class="course-photo">
         <img src="assets/images/workshop/ArtistHand.jpg" alt="יד אמנית מציירת" />
@@ -151,7 +151,7 @@
           *ngIf="extraDiscountActive"
           aria-label="הנחת השקה לזמן מוגבל">
           <p class="extra-offer">
-            הנחה של 100₪ עד ה-30.11
+            הנחה של 100₪ עד ה-3.12
             <span class="deal-price">1,700₪</span>
             או 4 תשלומים קלילים של
             <span class="deal-installment">425 שקלים</span>
@@ -178,7 +178,7 @@
         </article>
         <p>תוך חודש מהיום אתם יכולים לראות את עצמכם מתחילים לצייר, ותוך חודשיים אתם כבר תהיו עם ביטחון, טכניקות והמון כיף ושחרור שנכנס לכם לחיים!</p>
         <a href="#register" class="btn btn-primary price-cta" (click)="scrollToRegister($event)">
-          לשמירת מקום
+          להשארת פרטים
           <span class="title-emoji" aria-hidden="true">✨</span>
         </a>
       </div>
@@ -216,10 +216,10 @@
   <span>WhatsApp</span>
 </a>
 
-<div class="sticky-cta" [class.is-past-hero]="showStickyCta" aria-label="שמירת מקום">
+<div class="sticky-cta" [class.is-past-hero]="showStickyCta" aria-label="השארת פרטים">
   <span class="sticky-price">{{ displayPrice | number:'1.0-0' }}₪</span>
   <a href="#register" class="btn btn-primary" (click)="scrollToRegister($event)">
-    לשמירת מקום
+    להשארת פרטים
     <span class="title-emoji" aria-hidden="true">✨</span>
   </a>
 </div>

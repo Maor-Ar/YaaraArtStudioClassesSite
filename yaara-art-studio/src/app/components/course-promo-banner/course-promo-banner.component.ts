@@ -17,10 +17,10 @@ interface CountdownParts {
   styleUrl: './course-promo-banner.component.scss'
 })
 export class CoursePromoBannerComponent implements OnInit, OnDestroy {
-  /** Next beginner course opens Thursday 17.12.2026 at 10:00 Israel time. */
+  /** First session is 17.12.2026 at 10:00 Israel time; a second opening is 18.12. */
   readonly courseStartsAt = new Date('2026-12-17T10:00:00+02:00');
-  /** Extra 100₪ off stays through 30.11.2026 and hides from 1.12.2026 00:00 Israel time. */
-  readonly saleEndsAt = new Date('2026-12-01T00:00:00+02:00');
+  /** Extra 100₪ off stays through 3.12.2026 and hides from 4.12.2026 00:00 Israel time. */
+  readonly saleEndsAt = new Date('2026-12-04T00:00:00+02:00');
   readonly listPrice = '3,200₪';
   readonly launchPrice = '1,800₪';
   readonly earlyPrice = '1,700₪';
@@ -62,7 +62,7 @@ export class CoursePromoBannerComponent implements OnInit, OnDestroy {
   }
 
   get priceLabel(): string {
-    return this.extraDiscountActive ? 'הנחה של 100₪ עד ה-30.11' : 'מחיר מבצע';
+    return this.extraDiscountActive ? 'הנחה של 100₪ עד ה-3.12' : 'מחיר מבצע';
   }
 
   private tick(): void {
